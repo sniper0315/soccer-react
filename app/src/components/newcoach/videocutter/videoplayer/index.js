@@ -178,7 +178,7 @@ export default function VCVideoPlayer({ saveEdit, drawOpen }) {
     console.log('EditVideo => ', saveEdit, newClip);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '28px', width: '100%', marginLeft: '10%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '28px', width: '100%' }}>
             <Select
                 value={selectedGame?.id ?? 0}
                 onChange={handleSelectChange}

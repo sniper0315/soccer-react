@@ -357,6 +357,12 @@ const gameExportSportcode = (teamId, gameIds) => {
     });
 };
 
+const gameExportSportcodeShort = (teamId, gameIds) => {
+    return axios.get(API_URL + `game/game_export_sportcode_short/${teamId}/${gameIds}`, { headers: authHeader(), data: { teamId, gameIds } }).then((response) => {
+        return response.data;
+    });
+};
+
 const getGameById = (gameId) => {
     return axios.get(API_URL + `game/getgamebyid/${gameId}`, { headers: authHeader(), data: { gameId } }).then((response) => {
         return response.data;
@@ -575,6 +581,11 @@ const deletePlayerTag = (id) => {
 };
 const deletePlayer = (id) => {
     return axios.delete(API_URL + `player/${id}`, { headers: authHeader(), data: { id } }).then((response) => {
+        return response.data;
+    });
+};
+const deleteCorrection = (id) => {
+    return axios.delete(API_URL + `player/correction/${id}`, { headers: authHeader(), data: { id } }).then((response) => {
         return response.data;
     });
 };
@@ -944,6 +955,7 @@ const gameService = {
     getTeamBlocked,
     getOpponentBlocked,
     gameExportSportcode,
+    gameExportSportcodeShort,
     getAllMyCoachTeam,
     getMyCoachTeamList,
     getMyCoachPlayerList,
@@ -997,6 +1009,7 @@ const gameService = {
     deleteTeam,
     deleteLeague,
     deletePlayer,
+    deleteCorrection,
     deleteCoachTeam,
     deleteUserEdit,
     deleteUserFolder,

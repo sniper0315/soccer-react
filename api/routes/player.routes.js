@@ -67,6 +67,8 @@ module.exports = (app) => {
     controller.delete
   );
 
+  app.delete("/player/correction/:id", controller.deleteCorrection);
+
   app.delete("/player", [authJwt.isAdmin], controller.deleteAll);
 
   app.post(

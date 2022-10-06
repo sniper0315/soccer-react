@@ -3,6 +3,7 @@ const Player = db.player;
 const Player_Position = db.player_position;
 const User_Config = db.user_config;
 const Highlight = db.highlight;
+const Corrections = db.corrections;
 const Sequelize = db.sequelize;
 const Op = db.Sequelize.Op;
 
@@ -136,7 +137,6 @@ exports.findOne = async (req, res) => {
 };
 
 exports.getPlayersStats = (req, res) => {
-  console.log("########### ", req.params);
   const leagueId =
     req.params.leagueId === "null" ? null : `'${req.params.leagueId}'`;
   const gameId = req.params.gameId === "null" ? null : `'${req.params.gameId}'`;
@@ -187,7 +187,6 @@ exports.addCorrectionRequest = (req, res) => {
 };
 
 exports.getCorrectionRequest = (req, res) => {
-  console.log("++++++++++++++++ ", req);
   Sequelize.query(
     `select * from public.fnc_get_correction_requests(${req.userId})`
   )
@@ -355,6 +354,30 @@ exports.delete = (req, res) => {
     .catch((err) => {
       res.status(500).send({
         message: "Could not delete Player with id=" + id,
+      });
+    });
+};
+
+exports.deleteCorrection = (req, res) => {
+  const id = req.params.id;
+
+  Corrections.destroy({
+    where: { id: id },
+  })
+    .then((num) => {
+      if (num == 1) {
+        res.send({
+          message: "Correction was deleted successfully!",
+        });
+      } else {
+        res.send({
+          message: `Cannot delete Correction with id=${id}. Maybe Correction was not found!`,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: "Could not delete Correction with id=" + id,
       });
     });
 };
