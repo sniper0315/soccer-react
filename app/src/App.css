@@ -1,0 +1,106 @@
+@import url(https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap);
+
+.card-container.card {
+    max-width: 350px !important;
+    padding: 30px 30px;
+}
+
+body > iframe {
+    display: none;
+}
+
+.MuiListItemButton-root.Mui-selected {
+    color: white;
+    background-color: darkblue !important;
+    border-radius: 5px;
+}
+.css-qoi9-MuiPaper-root-MuiAccordion-root.Mui-expanded {
+    margin: 4px 0 !important;
+}
+.player-wrapper {
+    position: relative;
+    padding-top: 56.25%;
+}
+.react-player {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.MuiDropzoneArea-textContainer {
+    display: none;
+}
+.MuiDropzonePreviewList-removeButton {
+    bottom: 40px;
+    right: -200px !important;
+    top: auto !important;
+}
+
+.MuiTableCell-root {
+    padding: 2px !important;
+    font-size: 12px !important;
+}
+.MuiTablePagination-root p {
+    margin: 0px !important;
+}
+
+.card {
+    margin: 0 auto 25px;
+    margin-top: 50px;
+    -moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+}
+
+.profile-img-card {
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 10px;
+    display: block;
+    -moz-border-radius: 50%;
+    -webkit-border-radius: 50%;
+    border-radius: 50%;
+}
+/* width */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+div.team-theme-color {
+    width: 50px;
+    height: 30px;
+    border-radius: 6px;
+    margin: auto;
+}
+
+.css-19kzrtu {
+    padding: 0px !important;
+}
+.css-sytnxd-MuiButtonBase-root-MuiIconButton-root {
+    padding: 0 !important;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: transparent;
+}
+.player-select-checkbox .css-1e6ud36-MuiButtonBase-root-MuiCheckbox-root {
+    padding: 3px;
+}
+.Mui-expanded {
+    margin: 2px 0 !important;
+}

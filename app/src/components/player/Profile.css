@@ -1,0 +1,382 @@
+/* .profile-container {
+    width: 100%;
+    height: 100vh;
+    background-image: url("http://wallpapersafari.com/download/qxHlTK/");
+    background-color: #cccccc;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+} */
+.action-row {
+    padding-top: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.action-row .skilltab-action-title {
+    min-width: 100px;
+}
+.skilltab-action-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.skilltab-action-header-player {
+    width: 100%;
+    margin-right: 30px;
+    text-align: center;
+}
+.skilltab-action-header p {
+    margin-bottom: 0 !important;
+}
+.statistic-table-body td {
+    border-right: 1px #d6e7e8 solid;
+}
+.action-row .skilltab-play-button {
+    color: yellow;
+    padding: 0;
+}
+.action-row p {
+    margin-bottom: 0px !important;
+}
+.skilltab-total {
+    width: 50px;
+    text-align: center;
+}
+.profileSection {
+    background-color: white;
+    color: black;
+    font-family: sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+}
+.profileSection .css-axpoe8-MuiButtonBase-root-MuiTab-root {
+    min-width: 0;
+    padding: 12px 8px;
+}
+.profileSection .css-ahj2mt-MuiTypography-root {
+    font-size: 14px;
+}
+.profileSection td.profileSection_opponent-team {
+    display: flex;
+}
+.profileSection td.profileSection_opponent-team div.profileSection_game-result {
+    margin: auto;
+}
+.profileSection td.profileSection_opponent-team div.profileSection_game-score {
+    width: 60px;
+    margin: auto;
+    font-weight: 800;
+}
+
+.profileSection .profileSection_gametable {
+    margin-bottom: 50px;
+}
+.profileSection .profileSection_gametable td.profileSection_clickable:hover {
+    color: darkred;
+}
+.profileSection .profileSection_gametable td.profileSection_clickable:active {
+    color: grey;
+    font-weight: 700;
+}
+.profileSection tr.profileSection_gametable-head {
+    background-color: #e7f3e5;
+    border-top: 1px solid #80808061;
+}
+.profileSection div.profileSection_gametable-average {
+    display: flex;
+    padding: 0.5rem 0;
+    align-items: center;
+    background-color: #e7f3e5;
+    box-shadow: 0 0 3px grey;
+    border-bottom: 3px solid #058240;
+    position: fixed;
+    left: 0;
+    right: 0;
+    text-align: center;
+    bottom: 0;
+}
+.profileSection div.profileSection_gametable-average div:first-child {
+    flex: 4;
+}
+.profileSection div.profileSection_gametable-average div:not(:first-child) {
+    flex: 1;
+}
+.profileSection .profileSection_gametable tr td:not(:first-child) {
+    width: 10%;
+}
+.profileSection tr.profileSection_gametable-head th {
+    padding: 10px 0;
+}
+.profileSection tr {
+    border-bottom: 1px solid #80808036;
+}
+.profileSection td {
+    vertical-align: middle;
+}
+.profileInfo {
+    padding: 5px 10px;
+    margin: auto;
+}
+.RSPBprogressBar {
+    background-color: #495057ad;
+}
+.RSPBprogressBar .RSPBprogressBarText {
+    font-size: 14px;
+    font-weight: 600;
+}
+.profileSection .player_name {
+    color: #fff;
+    font-weight: 600;
+}
+div.player-detail-card {
+    background-color: #fff;
+}
+div.profileImg-wrapper {
+    position: relative;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+div.profileImg-wrapper .profileSponsorImg {
+    display: flex;
+    align-items: center;
+}
+div.player-detail-card div.profileimg {
+    width: 120px;
+    height: 120px;
+    border: 1px solid #f3f4f5;
+    box-shadow: 0px 0px 5px grey;
+    margin: 10px;
+    -webkit-border-radius: 60px;
+    -webkit-background-clip: padding-box;
+    -moz-border-radius: 60px;
+    -moz-background-clip: padding;
+    border-radius: 60px;
+    background-clip: padding-box;
+    float: left;
+    background-size: cover;
+    background-position: center center;
+}
+div.player-detail-card div.profileInfo {
+    background-color: #058240;
+    display: flex;
+    box-shadow: 0px 3px 5px grey;
+    justify-content: space-between;
+}
+div.player-detail-card .profileImg-wrapper-teamlogo {
+    margin: 12px 0;
+}
+div.player-detail-card div.profileInfo {
+    color: #fff;
+    font-family: sans-serif;
+}
+div.player-detail-card div.profileInfo div.player-detail-card_fullname {
+    font-size: 22px;
+    font-family: sans-serif;
+}
+div.player-detail-card div.profileInfo div.player-detail-card_jersey-pos {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+div.player-detail-card div.profileInfo div.player-detail-card_team {
+    padding-left: 1rem;
+}
+div.gameImage {
+    margin: 2px 4px;
+    -webkit-border-radius: 8px;
+    -webkit-background-clip: padding-box;
+    -moz-border-radius: 8px;
+    -moz-background-clip: padding;
+    border-radius: 8px;
+    background-clip: padding-box;
+    float: left;
+    background-size: cover;
+    background-position: center center;
+}
+ul.nav.nav-tabs {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.tableBorder {
+    margin-left: 4px;
+}
+.tableBorder .shots,
+.tableBorder .passes,
+.tableBorder .crosses {
+    border: 1px #d6e7e8 solid;
+    border-radius: 8px !important;
+    -webkit-border-radius: 8px !important;
+    -moz-border-radius: 8px !important;
+    -ms-border-radius: 8px !important;
+    -o-border-radius: 8px !important;
+}
+.statistic-clickable-success {
+    text-decoration: underline;
+    color: #007200 !important;
+    cursor: pointer;
+}
+.statistic-clickable-unsuccess {
+    text-decoration: underline;
+    color: red !important;
+    cursor: pointer;
+}
+.shots p {
+    margin: 0px;
+    color: #fff;
+}
+.shots-title {
+    color: black;
+    font-weight: 700;
+    background-color: #dddddd !important;
+}
+.passes span {
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+}
+.crosses span {
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.dividedColumn {
+    margin: 0 auto;
+    display: flex;
+}
+
+.column {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+}
+
+.column {
+    text-align: center;
+}
+.dividedColumn p {
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+}
+.dividedColumn h2 {
+    color: #fff;
+    font-weight: 700;
+    font-size: 28px !important;
+}
+
+.profileSection .nav-link {
+    color: white !important;
+    font-weight: 700;
+    background-color: #058240 !important;
+    margin-left: 2px !important;
+}
+
+.profileSection .nav-link.active {
+    background-color: #d9fce9 !important;
+    color: #222 !important;
+}
+.profileSection p {
+    color: black;
+}
+.heading {
+    font-size: 28px !important;
+}
+
+div.profileSection td h5,
+div.profileSection span {
+    color: whitesmoke !important;
+}
+
+div.profileSection .tableBorder .shots,
+div.profileSection .tableBorder .passes,
+div.profileSection .tableBorder .crosses {
+    border: 1px solid whitesmoke !important;
+}
+div.profileSection th,
+div.profileSection td {
+    padding: 10px 5px 20px 5px !important;
+}
+.skilltab-highlight-button {
+    font-size: 14px !important;
+}
+
+.highlight-table td {
+    vertical-align: middle;
+}
+.highlight-table .Mui-disabled {
+    color: white !important;
+    opacity: 0.5;
+}
+.highlight-progressbar {
+    min-width: 120px;
+}
+.highlight-progressbar .progress {
+    border-radius: 2.25rem !important;
+}
+.coach-actionlist-table {
+    margin-bottom: 0.1rem;
+}
+.coach-actionlist-table p,
+.coach-actionlist-table td {
+    margin: 0px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+}
+.coach-tag-table .Mui-selected {
+    background-color: rgba(25, 118, 210, 0.38) !important;
+}
+.profileSection_tagvideo ::-webkit-scrollbar {
+    width: 0 !important;
+}
+.profileSection_tagvideo .css-1t1j96h-MuiPaper-root-MuiDialog-paper {
+    min-width: 98%;
+    max-height: 98% !important;
+    background-color: transparent;
+    box-shadow: none;
+}
+
+@media (min-aspect-ratio: 2/1) {
+    .profileSection_tagvideo .css-1t1j96h-MuiPaper-root-MuiDialog-paper {
+        min-width: 80%;
+    }
+}
+
+.player-wrapper .react-player {
+    overflow: hidden;
+}
+
+.profileSection_tagvideo .MuiPaper-root.MuiPaper-elevation {
+    background: transparent;
+    box-shadow: none;
+    margin: 0 4px;
+}
+
+@media (orientation: landscape) {
+    .profileSection_tagvideo .MuiDialog-container.MuiDialog-scrollPaper {
+        align-items: flex-start;
+    }
+
+    .player-wrapper.tag-video {
+        padding-top: 46% !important;
+    }
+
+    .play-action-controls {
+        width: 70%;
+    }
+}
+
+@media only screen and (max-width: 767px) {
+    .profileSection .profileSection_gametable {
+        margin-bottom: 0;
+    }
+    .profileSection div.profileSection_gametable-average {
+        position: unset;
+    }
+}
