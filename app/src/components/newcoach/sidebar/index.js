@@ -17,6 +17,7 @@ const Sidebar = () => {
     const [selectIndex, setSelectIndex] = useState(0);
     const [pathname, setPathname] = useState(window.location.pathname);
     const [gameCount, setGameCount] = useState(0);
+    const [menuList, setMenuList] = useState([]);
     const [menuState, setMenuState] = useState({
         corrections: false
     });
@@ -39,6 +40,7 @@ const Sidebar = () => {
 
     useEffect(async () => {
         setPathname(window.location.pathname);
+        setMenuList(menuData);
 
         if (pathname.includes('/new_coach/dashboard')) setSelectIndex(0);
         else if (pathname.includes('/new_coach/games')) setSelectIndex(4);
@@ -52,17 +54,18 @@ const Sidebar = () => {
         else if (pathname.includes('/new_coach/video_cutter')) setSelectIndex(6);
         else setSelectIndex(10);
 
-        await GameService.getAllGamesByCoach(null, null, null, null).then((res) => {
-            setGameCount(res.length);
+        await GameService.getNumberOfGamesOrdered(null).then((res) => {
+            setGameCount(res[0].total_game);
+
+            if (res[0].total_game === 0) setMenuList(menuData.filter((item) => item.id !== 'dashboard'));
         });
+
         dispatch(getCorrectionCount());
     }, [pathname]);
 
     useEffect(() => {
         setMenuState({ ...menuState, corrections: currentGame.correctionCnt > 0 });
     }, [currentGame]);
-
-    console.log('hello => ', currentGame);
 
     return (
         <Box sx={{ backgroundColor: 'white', width: minimum ? '80px' : '180px', paddingTop: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -94,11 +97,11 @@ const Sidebar = () => {
             {minimum ? (
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', width: '100%', height: '5vh', gap: '4px', marginBottom: '8px' }}>
                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d' }}>{gameCount}</Typography>
-                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d' }}>Games</Typography>
+                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d' }}>Games Ordered</Typography>
                 </Box>
             ) : (
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '5vh', marginBottom: '8px' }}>
-                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d' }}>{gameCount} Games</Typography>
+                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d' }}>{gameCount} Games Ordered</Typography>
                 </Box>
             )}
         </Box>

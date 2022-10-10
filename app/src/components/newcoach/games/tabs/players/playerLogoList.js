@@ -42,6 +42,8 @@ const GamePlayerLogoList = ({ game, teamId, our, setIds }) => {
         setIds(ids);
     }, [selectArray]);
 
+    console.log('playerlogo => ', playerList);
+
     return (
         <Box sx={{ minWidth: '600px' }}>
             {loading && (
@@ -52,7 +54,7 @@ const GamePlayerLogoList = ({ game, teamId, our, setIds }) => {
             <Box sx={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto auto auto auto auto', gap: '2px' }}>
                 {playerList.map((item, index) => (
                     <Box key={index} sx={{ borderRadius: '10px', border: selectArray[index] ? '4px solid #0A7304' : '4px solid white', cursor: 'pointer' }} onClick={() => handleSelectPlayer(index)}>
-                        <GamePlayerLogo player={item} />
+                        <GamePlayerLogo player={item} game={game} team={teamId} />
                     </Box>
                 ))}
             </Box>

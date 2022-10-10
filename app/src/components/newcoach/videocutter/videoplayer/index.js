@@ -35,7 +35,7 @@ const styles = {
         position: 'absolute',
         bottom: 5,
         left: 8,
-        width: '88%'
+        width: '99%'
     },
     button: {
         color: 'white',
@@ -43,7 +43,7 @@ const styles = {
     }
 };
 
-export default function VCVideoPlayer({ saveEdit, drawOpen }) {
+export default function VCVideoPlayer({ saveEdit, drawOpen, updateList }) {
     const handle = useFullScreenHandle();
     const player = useRef(null);
     const [play, setPlay] = useState(false);
@@ -188,7 +188,7 @@ export default function VCVideoPlayer({ saveEdit, drawOpen }) {
                 inputProps={{ 'aria-label': 'Without label' }}
                 MenuProps={MenuProps}
                 disabled={gameList.length === 0}
-                sx={{ outline: 'none', height: '36px', width: '50%', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
+                sx={{ outline: 'none', height: '36px', width: '100%', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
             >
                 {gameList.map((game, index) => (
                     <MenuItem key={index} value={game.id}>
@@ -320,7 +320,7 @@ export default function VCVideoPlayer({ saveEdit, drawOpen }) {
                         </div>
                     </div>
                 </FullScreen>
-                <EditCreateClipDialog open={createOpen} onClose={() => setCreateOpen(false)} editNode={saveEdit} clip={newClip} onPlay={setPlay} />
+                <EditCreateClipDialog open={createOpen} onClose={() => setCreateOpen(false)} editNode={saveEdit} clip={newClip} onPlay={setPlay} updateList={updateList} />
             </div>
         </div>
     );

@@ -95,13 +95,13 @@ const GameOverview = ({ game }) => {
         if (values.playList.length === 0) {
             setValues({ ...values, clickEventName: 'render' });
             setLoadData(true);
-        } else gameCreateCommand(values.playList, tagIndex, [game.video_url], [game.id]);
+        } else gameCreateCommand(values.playList, tagIndex, [game], [game.id]);
     };
 
     const handleClickRenderFromButton = () => {
         const newList = values.playList.filter((item, index) => checkArray[index] === true);
 
-        gameCreateCommand(newList, tagIndex, [game.video_url], [game.id]);
+        gameCreateCommand(newList, tagIndex, [game], [game.id]);
     };
 
     const handleClickEditFromMenu = () => {
@@ -187,7 +187,7 @@ const GameOverview = ({ game }) => {
             setLoading(false);
             setLoadData(false);
 
-            if (values.clickEventName === 'render') gameCreateCommand(res, tagIndex, [game.video_url], [game.id]);
+            if (values.clickEventName === 'render') gameCreateCommand(res, tagIndex, [game], [game.id]);
             else if (values.clickEventName === 'sportcode') {
                 setPlayerTagList(res);
                 setExportHudl(true);
@@ -201,7 +201,8 @@ const GameOverview = ({ game }) => {
                     tagList: res.map((item) => {
                         return {
                             start_time: item.team_tag_start_time,
-                            end_time: item.team_tag_end_time
+                            end_time: item.team_tag_end_time,
+                            name: `${item.player_names} - ${item.action_names} - ${item.action_type_names} - ${item.action_result_names}`
                         };
                     })
                 });
@@ -322,7 +323,7 @@ const GameOverview = ({ game }) => {
         if (values.playList.length > 0) changeGameTime(values.playList, curTeamTagIdx);
     }, [curTeamTagIdx]);
 
-    console.log('GameOverview => ', curTeamTagIdx);
+    console.log('GameOverview => ', values.playList, game);
 
     return (
         <Box sx={{ width: '100%', background: 'white', maxHeight: '80vh', overflowY: 'auto', display: 'flex' }}>

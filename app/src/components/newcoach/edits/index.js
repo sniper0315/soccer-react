@@ -22,8 +22,12 @@ const Edits = () => {
         setCurTagIdx(index);
     };
 
-    const handleSort = async (rows) => {
-        await GameService.updateEditClipsSort(rows);
+    const handleSort = async (rows, isDropped) => {
+        if (!isDropped) await GameService.updateEditClipsSort(rows);
+        else await handleUpdateTable();
+    };
+
+    const handleUpdateTable = async () => {
         await GameService.getEditClipsByUserEditId(curEdit.id).then((res) => {
             setEditTagList(res);
         });
@@ -59,7 +63,16 @@ const Edits = () => {
             <Box sx={{ display: 'flex', maxHeight: '85vh', height: '85vh', background: 'white', overflowY: 'auto' }}>
                 <div style={{ display: 'flex', padding: '24px 0' }}>
                     <EditFolderTreeView setEdit={setCurEdit} isMain={true} entireHeight="95%" treeHeight="90%" />
-                    <EditTagTable loading={tagLoading} tagList={editTagList} setIdx={handleClickRow} selected={curTagIdx} sort={handleSort} name={curEdit?.name ?? ''} update={setEditTagList} />
+                    <EditTagTable
+                        loading={tagLoading}
+                        tagList={editTagList}
+                        setIdx={handleClickRow}
+                        selected={curTagIdx}
+                        sort={handleSort}
+                        name={curEdit?.name ?? ''}
+                        update={handleUpdateTable}
+                        showPlay={false}
+                    />
                 </div>
                 <EditVideoPlayer videoData={videoData} tagList={editTagList} onChangeClip={setCurTagIdx} drawOpen={true} />
             </Box>

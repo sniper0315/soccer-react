@@ -5,34 +5,42 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import update from 'immutability-helper';
 
 import { EditDraggableTableRow } from './draggableTableRow';
+import CorrectionsVideoPlayer from '../../corrections/videoDialog';
+import GameService from '../../../../services/game.service';
 
-const CoachTeamTagTable = ({ tagList, setIndex, selectIdx, handleSort, updateTable, setChecks }) => {
-    const [tableRows, setTableRows] = useState(tagList);
+const CoachTeamTagTable = ({ tagList, setIndex, selectIdx, handleSort, updateTable, setChecks, showPlay }) => {
+    const [tableRows, setTableRows] = useState([]);
     const [selectedRows, setSelectedRows] = useState([]);
     const [selectAll, setSelectAll] = useState(false);
     const selectedRef = useRef();
+    const [playOpen, setPlayOpen] = useState(false);
+    const [correctItem, setCorrectItem] = useState(null);
 
     selectedRef.current = selectedRows;
 
-    const moveRow = useCallback((dragIndex, hoverIndex) => {
-        setTableRows((prevCards) => {
-            const newRow = update(prevCards, {
-                $splice: [
-                    [dragIndex, 1],
-                    [hoverIndex, 0, prevCards[dragIndex]]
-                ]
+    const moveRow = useCallback((dragIndex, hoverIndex, isDropped) => {
+        console.log('dragging => ', isDropped);
+        if (!isDropped)
+            setTableRows((prevCards) => {
+                const newRow = update(prevCards, {
+                    $splice: [
+                        [dragIndex, 1],
+                        [hoverIndex, 0, prevCards[dragIndex]]
+                    ]
+                });
+                const start = dragIndex < hoverIndex ? dragIndex : hoverIndex;
+                const end = (dragIndex > hoverIndex ? dragIndex : hoverIndex) + 1;
+
+                handleSort(
+                    newRow.slice(start, end).map((row, i) => {
+                        return { ...row, sort: start + i };
+                    }),
+                    false
+                );
+
+                return newRow;
             });
-            const start = dragIndex < hoverIndex ? dragIndex : hoverIndex;
-            const end = (dragIndex > hoverIndex ? dragIndex : hoverIndex) + 1;
-
-            handleSort(
-                newRow.slice(start, end).map((row, i) => {
-                    return { ...row, sort: start + i };
-                })
-            );
-
-            return newRow;
-        });
+        else handleSort(null, true);
     }, []);
 
     const handleRowSelection = (id) => {
@@ -51,14 +59,13 @@ const CoachTeamTagTable = ({ tagList, setIndex, selectIdx, handleSort, updateTab
         setChecks(array);
     };
 
-    const handleUpdateTable = (index, data) => {
-        let array = [...tableRows];
+    const handleUpdateTable = useCallback(async (index, data) => {
+        setTableRows((prev) => update(prev, { [index]: { $set: data } }));
+        await GameService.updateEditClip(data);
+        updateTable();
+    }, []);
 
-        array[index] = data;
-        updateTable(array);
-    };
-
-    const renderRow = useCallback((tag, index, selected) => {
+    const renderRow = useCallback((tag, index, selected, play) => {
         return (
             <EditDraggableTableRow
                 key={tag.id}
@@ -72,14 +79,19 @@ const CoachTeamTagTable = ({ tagList, setIndex, selectIdx, handleSort, updateTab
                 rowChecked={selectedRef.current.includes(tag.id)}
                 onCheck={handleRowSelection}
                 updateList={handleUpdateTable}
+                showPlay={play}
+                setItem={setCorrectItem}
+                onPlay={setPlayOpen}
             />
         );
     }, []);
 
     useEffect(() => {
-        setTableRows(tagList);
-        setSelectedRows([]);
-        setSelectAll(false);
+        if (tagList !== tableRows) {
+            setTableRows(tagList);
+            setSelectedRows([]);
+            setSelectAll(false);
+        }
     }, [tagList]);
 
     useEffect(() => {
@@ -94,31 +106,43 @@ const CoachTeamTagTable = ({ tagList, setIndex, selectIdx, handleSort, updateTab
     }, [selectAll]);
 
     useEffect(() => {
-        if (selectedRows.length === tableRows.length) setSelectAll(true);
+        if (selectedRows.length === tableRows.length && tableRows.length > 0) setSelectAll(true);
     }, [selectedRows]);
 
     return (
-        <TableContainer style={{ height: '95%', width: '100%' }}>
-            <DndProvider backend={HTML5Backend}>
-                <Table stickyHeader aria-label="sticky table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>
-                                <Checkbox checked={selectAll} onChange={() => setSelectAll(!selectAll)} />
-                            </TableCell>
-                            <TableCell style={{ height: '36px' }}>Clip Name</TableCell>
-                            <TableCell align="center" style={{ height: '36px' }}>
-                                Start Time
-                            </TableCell>
-                            <TableCell align="center" style={{ height: '36px' }}>
-                                End Time
-                            </TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>{tableRows.map((tag, index) => renderRow(tag, index, selectIdx))}</TableBody>
-                </Table>
-            </DndProvider>
-        </TableContainer>
+        <>
+            <TableContainer style={{ height: '95%', width: '100%' }}>
+                <DndProvider backend={HTML5Backend}>
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>
+                                    <Checkbox checked={selectAll} onChange={() => setSelectAll(!selectAll)} />
+                                </TableCell>
+                                <TableCell style={{ height: '36px' }}>Clip Name</TableCell>
+                                <TableCell align="center" style={{ height: '36px' }}>
+                                    Start Time
+                                </TableCell>
+                                <TableCell align="center" style={{ height: '36px' }}>
+                                    End Time
+                                </TableCell>
+                                <TableCell />
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>{tableRows.map((tag, index) => renderRow(tag, index, selectIdx, showPlay))}</TableBody>
+                    </Table>
+                </DndProvider>
+            </TableContainer>
+            {playOpen && (
+                <CorrectionsVideoPlayer
+                    onClose={() => setPlayOpen(false)}
+                    video_url={correctItem?.video_url ?? ''}
+                    start={correctItem?.start_time ?? '00:00:00'}
+                    end={correctItem?.end_time ?? '00:00:00'}
+                    name={correctItem?.name ?? ''}
+                />
+            )}
+        </>
     );
 };
 
