@@ -55,7 +55,7 @@ const GamePlayerStatDialog = ({ open, onClose, player, initialState }) => {
                         <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '16px', fontWeight: 600, color: '#1a1b1d' }}>PROFILE</Typography>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '420px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', width: '120px', height: '120px' }}>
-                                <img src={USER_IMAGE_DEFAULT} style={{ borderRadius: '12px', height: '100%' }} />
+                                <img src={player?.image ? player?.image : USER_IMAGE_DEFAULT} style={{ borderRadius: '12px', height: '100%' }} />
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '280px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
