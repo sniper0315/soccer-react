@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogContent, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogContent, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import MatchAll from '../../../../../../assets/match_all.png';
@@ -39,7 +39,7 @@ const statList = [
     { id: 'player_games', title: 'Games' }
 ];
 
-const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initialState, where }) => {
+const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, leagueId, initialState }) => {
     const [playerState, setPlayerState] = useState(null);
     const [gameHalf, setGameHalf] = useState(['first', 'second']);
     const [gameTime, setGameTime] = useState(['1', '2', '3', '4', '5', '6']);
@@ -102,6 +102,20 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initia
         }
     };
 
+    const handleChangeGameResult = (e, newResult) => {
+        setGameResult(newResult);
+    };
+
+    const handleChangeGamePlace = (e, newPlace) => {
+        setGamePlace(newPlace);
+    };
+
+    const getPlayerStat = (id) => {
+        if (id === 'player_games') return playerState[`total_${id}`];
+
+        return playerState[`total_${id}`] + ' (' + playerState[`average_${id}`] + ')';
+    };
+
     const handleChangeCourtArea = (courtId) => {
         let newList = [...courtArea];
 
@@ -109,14 +123,6 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initia
         else newList = [...newList, courtId];
 
         setCourtArea(newList);
-    };
-
-    const handleChangeGameResult = (e, newResult) => {
-        setGameResult(newResult);
-    };
-
-    const handleChangeGamePlace = (e, newPlace) => {
-        setGamePlace(newPlace);
     };
 
     const handlePlayerStat = () => {
@@ -128,17 +134,17 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initia
 
         setLoading(true);
         GameService.getPlayersStatsAdvanced({
-            seasonId: game.season_id,
-            leagueId: game.league_id,
-            gameId: game.id,
+            seasonId: seasonId,
+            leagueId: leagueId,
+            gameId: null,
             teamId: teamId,
-            playerId: player.player_id,
+            playerId: player.id,
             gameTime: gameTime.join(','),
             courtAreaId: courtArea.join(','),
             insidePaint: null,
-            homeAway: null,
-            gameResult: null,
-            our: where === 'Games' ? our : false
+            homeAway: gamePlace ? parseInt(gamePlace) : null,
+            gameResult: gameResult ? parseInt(gameResult) : null,
+            our: true
         }).then((res) => {
             console.log(res);
             setPlayerState(res[0]);
@@ -166,11 +172,11 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initia
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '320px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d', flex: 1 }}>First name</Typography>
-                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 500, color: '#1a1b1d', flex: 1 }}>{player?.first_name ?? ''}</Typography>
+                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 500, color: '#1a1b1d', flex: 1 }}>{player?.f_name ?? ''}</Typography>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d', flex: 1 }}>Last name</Typography>
-                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 500, color: '#1a1b1d', flex: 1 }}>{player?.last_name ?? ''}</Typography>
+                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 500, color: '#1a1b1d', flex: 1 }}>{player?.l_name ?? ''}</Typography>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d', flex: 1 }}>Jersey Number</Typography>
@@ -178,7 +184,7 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initia
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d', flex: 1 }}>Position</Typography>
-                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 500, color: '#1a1b1d', flex: 1 }}>{player?.name ?? ''}</Typography>
+                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 500, color: '#1a1b1d', flex: 1 }}>{player?.pos_name ?? ''}</Typography>
                                 </div>
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d', flex: 1 }}>Birth date</Typography>
@@ -245,7 +251,7 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initia
                             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flex: 1, padding: '6px', borderRadius: '8px', border: '1px solid #E8E8E8' }}>
                                 <div style={{ width: '100%' }}>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 500, color: '#1a1b1d' }}>GAME RESULT</Typography>
-                                    <ToggleButtonGroup disabled exclusive color="success" fullWidth size="small" value={gameResult} onChange={handleChangeGameResult}>
+                                    <ToggleButtonGroup exclusive color="success" fullWidth size="small" value={gameResult} onChange={handleChangeGameResult}>
                                         <ToggleButton value="1">Won</ToggleButton>
                                         <ToggleButton value="2">Draw</ToggleButton>
                                         <ToggleButton value="3">Lose</ToggleButton>
@@ -253,7 +259,7 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initia
                                 </div>
                                 <div style={{ width: '100%' }}>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 500, color: '#1a1b1d' }}>GAME PLACE</Typography>
-                                    <ToggleButtonGroup disabled exclusive color="success" fullWidth size="small" value={gamePlace} onChange={handleChangeGamePlace}>
+                                    <ToggleButtonGroup exclusive color="success" fullWidth size="small" value={gamePlace} onChange={handleChangeGamePlace}>
                                         <ToggleButton value="1">Home</ToggleButton>
                                         <ToggleButton value="2">Away</ToggleButton>
                                     </ToggleButtonGroup>
@@ -284,7 +290,7 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initia
                             >
                                 <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 500, color: '#1a1b1d' }}>{item.title}</Typography>
                                 <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 500, color: '#1a1b1d' }}>
-                                    {!loading ? (playerState ? playerState[`total_${item.id}`] : '0') : '0'}
+                                    {!loading ? (playerState ? getPlayerStat(item.id) : '0') : '0'}
                                 </Typography>
                             </div>
                         ))}
@@ -296,4 +302,4 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initia
     );
 };
 
-export default GamePlayerStatDialog;
+export default TeamPlayerStatDialog;

@@ -3,6 +3,7 @@ import builder from 'xmlbuilder';
 import fileDownload from 'js-file-download';
 
 import gameService from '../../../services/game.service';
+import { TEAM_ICON_DEFAULT } from '../../../common/staticData';
 
 export const gameCreateCommand = async (tagList, name, games, gameIds) => {
     let videoList = await Promise.all(
@@ -21,8 +22,8 @@ export const gameCreateCommand = async (tagList, name, games, gameIds) => {
         return {
             url: tag.url,
             SecondBoxText: name.replace("'", ''),
-            HomeTeamLogo: tag.home,
-            AwayTeamLogo: tag.away
+            HomeTeamLogo: tag.home ? tag.home : TEAM_ICON_DEFAULT,
+            AwayTeamLogo: tag.away ? tag.away : TEAM_ICON_DEFAULT
         };
     });
 
@@ -84,8 +85,8 @@ export const gamePlayerCreateCommand = async (tagList, name, games, gameIds) => 
         return {
             url: tag.url,
             SecondBoxText: name.replace("'", ''),
-            HomeTeamLogo: tag.home,
-            AwayTeamLogo: tag.away
+            HomeTeamLogo: tag.home ? tag.home : TEAM_ICON_DEFAULT,
+            AwayTeamLogo: tag.away ? tag.away : TEAM_ICON_DEFAULT
         };
     });
 
@@ -132,21 +133,26 @@ export const gamePlayerCreateCommand = async (tagList, name, games, gameIds) => 
 
 export const editCreateCommand = async (tagList, name) => {
     let rawVideoList = [...new Set(tagList.map((tag) => tag.video_url))];
-    let videoList = await Promise.all(
+    let videoList = [];
+
+    await Promise.all(
         tagList.map(async (game) => {
-            if (game.video_url?.startsWith('https://www.youtube.com')) {
-                const newUrl = (await gameService.getAsyncNewStreamURL(game.video_url)).url;
+            let newUrl = '';
 
-                return { url: newUrl, home: game.home_team_logo, away: game.away_team_logo };
-            }
+            if (game.video_url?.startsWith('https://www.youtube.com')) newUrl = (await gameService.getAsyncNewStreamURL(game.video_url)).url;
+            else newUrl = game.video_url;
 
-            return { url: game.video_url, home: game.home_team_logo, away: game.away_team_logo };
+            const duplicate = videoList.filter((item) => item.url === newUrl);
+
+            if (duplicate.length === 0) videoList = [...videoList, { url: newUrl, home: game.home_team_logo, away: game.away_team_logo }];
+
+            return videoList;
         })
     );
 
     let videos = videoList.map((tag, i) => {
         return {
-            url: tag,
+            url: tag.url,
             SecondBoxText: name,
             HomeTeamLogo: tag.home,
             AwayTeamLogo: tag.away

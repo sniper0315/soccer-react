@@ -18,6 +18,8 @@ const TeamPage = () => {
         playerStats: [],
         teamName: '',
         teamId: -1,
+        seasonId: -1,
+        leagueId: -1,
         tabSelected: 0,
         loading: false,
         loadingDone: false
@@ -52,9 +54,10 @@ const TeamPage = () => {
                 courtAreaId: null,
                 insidePaint: null,
                 homeAway: null,
-                gameResult: null
+                gameResult: null,
+                our: true
             }).then((data) => {
-                setValues({ ...values, players: stats, playerStats: data, teamName: stats[0].team_name, loading: false, loadingDone: true, teamId: ids[0] });
+                setValues({ ...values, players: stats, playerStats: data, teamName: stats[0].team_name, loading: false, loadingDone: true, teamId: ids[0], seasonId: ids[1], leagueId: ids[2] });
             });
         }
     }, [params]);
@@ -75,7 +78,7 @@ const TeamPage = () => {
                             <Link to="/new_coach/teams">
                                 <ChevronLeftIcon sx={{ width: '32px', height: '32px' }} />
                             </Link>
-                            <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '30px', fontWeight: 700, color: '#1a1b1d' }}>{values.teamName}</Typography>
+                            <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '30px', fontWeight: 700, color: '#1a1b1d' }}>Team {values.teamName}</Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '32px', paddingLeft: '56px' }}>
                             {Tabs.map((tab, index) => (
@@ -92,7 +95,7 @@ const TeamPage = () => {
                     </Box>
                     {values.tabSelected === 0 && <TeamOverview games={gameList} teamname={values.teamName} teamId={values.teamId} />}
                     {values.tabSelected === 3 && <TeamGames />}
-                    {values.tabSelected === 4 && <TeamPlayers playerList={values.players} stats={values.playerStats} />}
+                    {values.tabSelected === 4 && <TeamPlayers playerList={values.players} stats={values.playerStats} teamId={values.teamId} seasonId={values.seasonId} leagueId={values.leagueId} />}
                 </>
             )}
         </Box>
