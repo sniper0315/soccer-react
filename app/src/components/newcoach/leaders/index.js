@@ -7,6 +7,7 @@ import GameService from '../../../services/game.service';
 import LeadersPlayerStatColumn from './playerStatColumn';
 import { MenuProps } from '../components/common';
 import { getComparator, stableSort } from '../components/utilities';
+import LeadersPlayerStatDialog from './status';
 
 const statCategory = [
     { id: 'player_games', title: 'Games Played' },
@@ -55,6 +56,8 @@ const Leaders = () => {
     const [leagueList, setLeagueList] = useState([]);
     const [playersList, setPlayersList] = useState([]);
     const [displayOption, setDisplayOption] = useState('total');
+    const [currentPlayer, setCurrentPlayer] = useState(null);
+    const [statOpen, setStatOpen] = useState(false);
     const [values, setValues] = useState({
         teamFilter: 'none',
         seasonFilter: 'none',
@@ -64,6 +67,11 @@ const Leaders = () => {
 
     const handleChange = (prop) => (e) => {
         setValues({ ...values, [prop]: e.target.value });
+    };
+
+    const handleDisplayStatDialog = (player) => {
+        setCurrentPlayer(player);
+        setStatOpen(true);
     };
 
     const getSeasonList = (array) => {
@@ -237,7 +245,8 @@ const Leaders = () => {
             courtAreaId: null,
             insidePaint: null,
             homeAway: null,
-            gameResult: null
+            gameResult: null,
+            our: true
         }).then((res) => {
             setPlayerList(res);
             setSeasonList(getSeasonList(res));
@@ -245,7 +254,7 @@ const Leaders = () => {
         });
     }, []);
 
-    console.log('leaders => ', values.playerFilter);
+    console.log('leaders => ', playerList);
 
     return (
         <Box sx={{ width: '98%', margin: '0 auto' }}>
@@ -376,11 +385,13 @@ const Leaders = () => {
                                 isTotal={item.id === 'player_games' ? true : displayOption === 'total'}
                                 option={item.id}
                                 title={item.title}
+                                onClick={handleDisplayStatDialog}
                             />
                         ))}
                     </Box>
                 </>
             )}
+            <LeadersPlayerStatDialog open={statOpen} onClose={() => setStatOpen(false)} player={currentPlayer} />
         </Box>
     );
 };
