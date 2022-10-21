@@ -54,7 +54,7 @@ const GamePage = () => {
                                 <Link to="/new_coach/games">
                                     <ChevronLeftIcon sx={{ width: '30px', height: '30px' }} />
                                 </Link>
-                                <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '30px', fontWeight: 700, color: '#1a1b1d' }}>Game</Typography>
+                                <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.4rem', fontWeight: 700, color: '#1a1b1d' }}>Game</Typography>
                             </Box>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '8px 16px' }}>

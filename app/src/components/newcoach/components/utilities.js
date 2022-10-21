@@ -4,6 +4,7 @@ import fileDownload from 'js-file-download';
 
 import gameService from '../../../services/game.service';
 import { TEAM_ICON_DEFAULT } from '../../../common/staticData';
+import { getPeriod } from '../games/tabs/overview/tagListItem';
 
 export const gameCreateCommand = async (tagList, name, games, gameIds) => {
     let videoList = await Promise.all(
@@ -150,12 +151,12 @@ export const editCreateCommand = async (tagList, name) => {
         })
     );
 
-    let videos = videoList.map((tag, i) => {
+    let videos = videoList.map((tag) => {
         return {
             url: tag.url,
             SecondBoxText: name,
-            HomeTeamLogo: tag.home,
-            AwayTeamLogo: tag.away
+            HomeTeamLogo: tag.home ? tag.home : TEAM_ICON_DEFAULT,
+            AwayTeamLogo: tag.away ? tag.away : TEAM_ICON_DEFAULT
         };
     });
 
@@ -163,7 +164,9 @@ export const editCreateCommand = async (tagList, name) => {
         return {
             Video: rawVideoList.indexOf(tag.video_url) + 1,
             Trim: `${toSecond(tag.start_time)}:${toSecond(tag.end_time)}`,
-            FirstBoxText: tag.name
+            GameTime: `${getPeriod(tag.period)} ${tag.time_in_game}'`,
+            GameScore: `${tag.home_team_goal} - ${tag.away_team_goal}`,
+            FirstBoxText: tag.clip_name
         };
     });
 

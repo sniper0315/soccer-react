@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogContent, Stack, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogContent, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import MatchAll from '../../../../../../assets/match_all.png';
@@ -21,6 +21,7 @@ const statList = [
     { id: 'dribble_successful', title: 'Successful Dribbles' },
     { id: 'crosses', title: 'Crosses' },
     { id: 'free_kick', title: 'Free Kicks' },
+    { id: 'corner', title: 'Corners' },
     { id: 'passes', title: 'Passes' },
     { id: 'successful_passes', title: 'Successful Passes' },
     { id: 'passes_for_shots', title: 'Passes For Shots' },
@@ -33,12 +34,13 @@ const statList = [
     { id: 'interception', title: 'Interceptions' },
     { id: 'saved', title: 'Saved' },
     { id: 'clearance', title: 'Clearance' },
+    { id: 'blocked', title: 'Blocked' },
     { id: 'fouls', title: 'Fouls' },
     { id: 'yellow_cards', title: 'Yellow Cards' },
     { id: 'red_cards', title: 'Red Cards' }
 ];
 
-const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initialState, where }) => {
+const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, initialState }) => {
     const [playerState, setPlayerState] = useState(null);
     const [gameHalf, setGameHalf] = useState(['first', 'second']);
     const [gameTime, setGameTime] = useState(['1', '2', '3', '4', '5', '6']);
@@ -136,8 +138,7 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, our, initia
             courtAreaId: courtArea.join(','),
             insidePaint: null,
             homeAway: null,
-            gameResult: null,
-            our: where === 'Games' ? our : false
+            gameResult: null
         }).then((res) => {
             console.log(res);
             setPlayerState(res[0]);

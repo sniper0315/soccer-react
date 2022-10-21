@@ -21,6 +21,7 @@ const statList = [
     { id: 'dribble_successful', title: 'Successful Dribbles' },
     { id: 'crosses', title: 'Crosses' },
     { id: 'free_kick', title: 'Free Kicks' },
+    { id: 'corner', title: 'Corners' },
     { id: 'passes', title: 'Passes' },
     { id: 'successful_passes', title: 'Successful Passes' },
     { id: 'passes_for_shots', title: 'Passes For Shots' },
@@ -33,6 +34,7 @@ const statList = [
     { id: 'interception', title: 'Interceptions' },
     { id: 'saved', title: 'Saved' },
     { id: 'clearance', title: 'Clearance' },
+    { id: 'blocked', title: 'Blocked' },
     { id: 'fouls', title: 'Fouls' },
     { id: 'yellow_cards', title: 'Yellow Cards' },
     { id: 'red_cards', title: 'Red Cards' },
@@ -143,8 +145,7 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, leagueI
             courtAreaId: courtArea.join(','),
             insidePaint: null,
             homeAway: gamePlace ? parseInt(gamePlace) : null,
-            gameResult: gameResult ? parseInt(gameResult) : null,
-            our: true
+            gameResult: gameResult ? parseInt(gameResult) : null
         }).then((res) => {
             console.log(res);
             setPlayerState(res[0]);

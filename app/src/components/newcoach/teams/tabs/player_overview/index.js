@@ -6,16 +6,16 @@ import UpIcon from '@mui/icons-material/KeyboardDoubleArrowUpOutlined';
 
 import GameService from '../../../../../services/game.service';
 import { gamePlayerCreateCommand } from '../../../components/utilities';
-import { XmlDataFilterGamePlayer } from '../../../components/xmldata';
-import GamePlayerTagList from './tagList';
-import GameTagControlSection from '../overview/tagControlSection';
-import GameTagMenu from '../overview/tagMenu';
-import GameOverviewHeader from '../overview/header';
-import GamePlayerTagButtonList from './tagButtonList';
-import GamePlayerLogoList from './playerLogoList';
-import GameExportToEdits from '../overview/exportEdits';
-import { getPeriod } from '../overview/tagListItem';
-import GameVideoPlayer from '../../gameVideoPlayer';
+import GamePlayerTagList from '../../../games/tabs/players/tagList';
+import GameTagControlSection from '../../../games/tabs/overview/tagControlSection';
+import GameTagMenu from '../../../games/tabs/overview/tagMenu';
+import GamePlayerTagButtonList from '../../../games/tabs/players/tagButtonList';
+import GameExportToEdits from '../../../games/tabs/overview/exportEdits';
+import { getPeriod } from '../../../games/tabs/overview/tagListItem';
+import TeamGameSelectDialog from '../overview/gameSelectDialog';
+import { SaveButton } from '../../../components/common';
+import TeamVideoPlayer from '../overview/teamVideoPlayer';
+import TeamPlayerLogoList from './playerLogoList';
 
 const ActionData = {
     Goal: { action_id: '1', action_type_id: null, action_result_id: '3' },
@@ -40,7 +40,7 @@ const ActionData = {
     All: { action_id: null, action_type_id: null, action_result_id: null }
 };
 
-const GamePlayers = ({ game }) => {
+const TeamPlayersOverview = ({ games, teamId }) => {
     const [curTeamTagIdx, setCurTeamTagIdx] = useState(0);
     const [videoData, setVideoData] = useReducer((old, action) => ({ ...old, ...action }), {
         idx: 0,
@@ -52,8 +52,6 @@ const GamePlayers = ({ game }) => {
         isOur: true,
         expandButtons: true,
         playList: [],
-        teamId: -1,
-        opponentTeamId: -1,
         selectAll: false,
         clickEventName: ''
     });
@@ -70,22 +68,23 @@ const GamePlayers = ({ game }) => {
     const [loadData, setLoadData] = useState(false);
     const [loading, setLoading] = useState(false);
     const [checkArray, setCheckArray] = useState([]);
-    const [exportHudl, setExportHudl] = useState(false);
     const [playerTagList, setPlayerTagList] = useState([]);
     const [playerIds, setPlayerIds] = useState([]);
     const [exportEditOpen, setExportEditOpen] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [gameIds, setGameIds] = useState([]);
 
     const [menuAnchorEl, setMenuAnchorEl] = useState(null);
 
     const { user: currentUser } = useSelector((state) => state.auth);
 
-    const handleChangeTeam = (flag) => {
-        setValues({ ...values, isOur: flag, playList: [] });
-        setVideoData({ ...videoData, idx: 0, tagList: [] });
-        setTagIndex({});
-    };
-
     const handleShowPopover = (idx) => (e) => {
+        if (gameIds.length === 0) {
+            window.alert("No selected games. Please click 'Select Games' button to select.");
+
+            return;
+        }
+
         setTagIndex(idx);
         setGameTime({ ...gameTime, period: 'H1', time: 0, home_team_goals: 0, away_team_goals: 0, home_team_image: '', away_team_image: '' });
         setMenuAnchorEl(e.currentTarget);
@@ -101,7 +100,6 @@ const GamePlayers = ({ game }) => {
         const newList = values.playList.filter((item, index) => checkArray[index] === true);
 
         setPlayerTagList(newList);
-        setExportHudl(true);
     };
 
     const handleClickHudlFromMenu = () => {
@@ -112,7 +110,6 @@ const GamePlayers = ({ game }) => {
             setLoadData(true);
         } else {
             setPlayerTagList(values.playList);
-            setExportHudl(true);
         }
     };
 
@@ -122,13 +119,13 @@ const GamePlayers = ({ game }) => {
         if (values.playList.length === 0) {
             setValues({ ...values, clickEventName: 'render' });
             setLoadData(true);
-        } else gamePlayerCreateCommand(values.playList, tagIndex.name, [game], [game.id]);
+        } else gamePlayerCreateCommand(values.playList, tagIndex.name, games, gameIds);
     };
 
     const handleClickRenderFromButton = () => {
         const newList = values.playList.filter((item, index) => checkArray[index] === true);
 
-        gamePlayerCreateCommand(newList, tagIndex.name, [game], [game.id]);
+        gamePlayerCreateCommand(newList, tagIndex.name, games, gameIds);
     };
 
     const handleClickEditsFromButton = () => {
@@ -202,10 +199,10 @@ const GamePlayers = ({ game }) => {
             ...gameTime,
             period: getPeriod(array[idx].period),
             time: array[idx].time_in_game,
-            home_team_goals: array[idx].home_team_goal ?? undefined,
-            away_team_goals: array[idx].away_team_goal ?? undefined,
-            home_team_image: array[idx].home_team_logo ?? undefined,
-            away_team_image: array[idx].away_team_logo ?? undefined
+            home_team_goals: array[idx].home_team_goal ?? 0,
+            away_team_goals: array[idx].away_team_goal ?? 0,
+            home_team_image: array[idx].home_team_logo ?? '',
+            away_team_image: array[idx].away_team_logo ?? ''
         });
     };
 
@@ -215,10 +212,9 @@ const GamePlayers = ({ game }) => {
             setLoading(false);
             setLoadData(false);
 
-            if (values.clickEventName === 'render') gamePlayerCreateCommand(res, tagIndex.name, [game], [game.id]);
+            if (values.clickEventName === 'render') gamePlayerCreateCommand(res, tagIndex.name, games, gameIds);
             else if (values.clickEventName === 'sportcode') {
                 setPlayerTagList(res);
-                setExportHudl(true);
             } else if (values.clickEventName === 'my_edits') {
                 setPlayerTagList(res);
                 setExportEditOpen(true);
@@ -226,13 +222,7 @@ const GamePlayers = ({ game }) => {
                 setVideoData({
                     ...videoData,
                     idx: 0,
-                    tagList: res.map((item) => {
-                        return {
-                            start_time: item.player_tag_start_time,
-                            end_time: item.player_tag_end_time,
-                            name: `${item.player_names} - ${item.action_names} - ${item.action_type_names} - ${item.action_result_names}`
-                        };
-                    })
+                    tagList: res
                 });
                 setValues({ ...values, playList: res });
                 setCheckArray([]);
@@ -253,9 +243,9 @@ const GamePlayers = ({ game }) => {
             getPlayTagList(
                 GameService.getGamePlayerTags(
                     currentUser.id,
-                    values.isOur ? values.teamId : values.opponentTeamId,
+                    teamId,
                     playerIds.length === 0 ? null : playerIds.join(','),
-                    `${game.id}`,
+                    gameIds.length > 0 ? gameIds.join(',') : null,
                     ActionData[tagIndex.id].action_id,
                     ActionData[tagIndex.id].action_type_id,
                     ActionData[tagIndex.id].action_result_id
@@ -263,21 +253,6 @@ const GamePlayers = ({ game }) => {
             );
         }
     }, [tagIndex, loadData]);
-
-    useEffect(() => {
-        setLoading(true);
-        GameService.getAllMyCoachTeam().then((res) => {
-            const filtered = res.filter(
-                (item) => item.season_name === game.season_name && item.league_name === game.league_name && (item.team_id === game.home_team_id || item.team_id === game.away_team_id)
-            );
-            const team = filtered[0].team_id;
-            const opponent = team === game.home_team_id ? game.away_team_id : game.home_team_id;
-
-            setValues({ ...values, teamId: team, opponentTeamId: opponent });
-            setGameTime({ ...gameTime, video_url: game.video_url });
-            setLoading(false);
-        });
-    }, []);
 
     useEffect(() => {
         setCheckArray([]);
@@ -290,20 +265,18 @@ const GamePlayers = ({ game }) => {
         if (values.playList.length > 0) changeGameTime(values.playList, curTeamTagIdx);
     }, [curTeamTagIdx]);
 
-    console.log('GamePlayer => ', values.playList, playerIds);
-    // console.log(`GamePlayer => ${values.teamId}, ${values.opponentTeamId}`);
+    console.log('opponent => ', values.playList);
+    console.log('opponent => ', values.clickEventName);
 
     return (
         <Box sx={{ width: '100%', background: 'white', maxHeight: '80vh', overflowY: 'auto', display: 'flex' }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', padding: '24px 16px' }}>
-                <GameOverviewHeader
-                    isOur={values.isOur}
-                    ourname={values.teamId === game.away_team_id ? game.away_team_name : game.home_team_name}
-                    enemyname={values.opponentTeamId === game.home_team_id ? game.home_team_name : game.away_team_name}
-                    onChangeTeam={handleChangeTeam}
-                    mb="8px"
-                />
-                <GamePlayerLogoList game={game} teamId={values.teamId} opponent={values.opponentTeamId} our={values.isOur} setIds={setPlayerIds} />
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                    <SaveButton sx={{ fontWeight: 500, width: '120px', height: '28px' }} onClick={() => setDialogOpen(true)}>
+                        Select Games
+                    </SaveButton>
+                </Box>
+                <TeamPlayerLogoList games={gameIds} teamId={teamId} setIds={setPlayerIds} />
                 {values.expandButtons && <GamePlayerTagButtonList selectedTag={tagIndex} onShow={handleShowPopover} />}
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <Box sx={{ flex: 1, height: '1px', background: 'black' }} />
@@ -340,11 +313,11 @@ const GamePlayers = ({ game }) => {
                     onTime={handleChangeTime}
                 />
             </Box>
-            <GameVideoPlayer videoData={videoData} game={gameTime} onChangeClip={(idx) => setCurTeamTagIdx(idx)} drawOpen={true} />
-            {exportHudl && <XmlDataFilterGamePlayer game={game} tagList={playerTagList} isOur={values.isOur} tag_name={tagIndex.name} setExportXML={setExportHudl} />}
+            <TeamVideoPlayer videoData={videoData} games={games} onChangeClip={(idx) => setCurTeamTagIdx(idx)} drawOpen={true} gameTime={gameTime} isTeams={false} />
+            <TeamGameSelectDialog open={dialogOpen} onClose={() => setDialogOpen(false)} gameList={games} setIds={setGameIds} />
             <GameExportToEdits open={exportEditOpen} onClose={() => setExportEditOpen(false)} tagList={playerTagList} isTeams={false} />
         </Box>
     );
 };
 
-export default GamePlayers;
+export default TeamPlayersOverview;

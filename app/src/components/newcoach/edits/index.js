@@ -11,14 +11,8 @@ const Edits = () => {
     const [curEdit, setCurEdit] = useState(null);
     const [tagLoading, setTagLoading] = useState(false);
     const [curTagIdx, setCurTagIdx] = useState(-1);
-    const [videoData, setVideodata] = useState({
-        idx: 0,
-        autoPlay: true,
-        videoPlay: false
-    });
 
     const handleClickRow = (index) => {
-        setVideodata({ ...videoData, idx: index });
         setCurTagIdx(index);
     };
 
@@ -36,7 +30,6 @@ const Edits = () => {
     useEffect(() => {
         setEditTagList([]);
         setCurTagIdx(-1);
-        setVideodata({ ...videoData, idx: 0 });
 
         if (curEdit !== null && curEdit.type === 'edit') {
             setTagLoading(true);
@@ -50,7 +43,6 @@ const Edits = () => {
 
     useEffect(() => {
         setCurTagIdx(0);
-        setVideodata({ ...videoData, idx: 0 });
     }, [editTagList]);
 
     console.log('Edits => ', curTagIdx, editTagList);
@@ -58,7 +50,7 @@ const Edits = () => {
     return (
         <Box sx={{ width: '98%', margin: '0 auto' }}>
             <Box sx={{ width: '100%', padding: '24px 24px 21px 48px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '30px', fontWeight: 700, color: '#1a1b1d' }}>My Edits</Typography>
+                <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.4rem', fontWeight: 700, color: '#1a1b1d' }}>My Edits</Typography>
             </Box>
             <Box sx={{ display: 'flex', maxHeight: '85vh', height: '85vh', background: 'white', overflowY: 'auto' }}>
                 <div style={{ display: 'flex', padding: '24px 0' }}>
@@ -74,7 +66,7 @@ const Edits = () => {
                         showPlay={false}
                     />
                 </div>
-                <EditVideoPlayer videoData={videoData} tagList={editTagList} onChangeClip={setCurTagIdx} drawOpen={true} />
+                <EditVideoPlayer idx={curTagIdx} tagList={editTagList} onChangeClip={setCurTagIdx} drawOpen={true} />
             </Box>
         </Box>
     );
