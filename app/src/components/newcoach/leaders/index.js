@@ -265,12 +265,12 @@ const Leaders = () => {
             )}
             {!loading && (
                 <>
-                    <Box sx={{ padding: '24px 24px 48px 48px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Box sx={{ padding: '24px 24px 24px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <p className="page-title">Leaders</p>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: '24px', paddingLeft: '30px' }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'row', gap: '16px' }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <p className="select-narrator">Season</p>
+                                    <p className="select-narrator">Seasons</p>
                                     <Select
                                         value={values.seasonFilter}
                                         onChange={handleChange('seasonFilter')}
@@ -279,7 +279,7 @@ const Leaders = () => {
                                         IconComponent={ExpandMoreIcon}
                                         inputProps={{ 'aria-label': 'Without label' }}
                                         MenuProps={MenuProps}
-                                        sx={{ outline: 'none', height: '36px', width: '200px', fontSize: '0.8rem', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
+                                        sx={{ outline: 'none', height: '36px', width: '120px', fontSize: '0.8rem', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
                                     >
                                         <MenuItem key="0" value="none">
                                             All
@@ -292,7 +292,7 @@ const Leaders = () => {
                                     </Select>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <p className="select-narrator">League</p>
+                                    <p className="select-narrator">Leagues</p>
                                     <Select
                                         value={values.leagueFilter}
                                         onChange={handleChange('leagueFilter')}
@@ -301,7 +301,7 @@ const Leaders = () => {
                                         IconComponent={ExpandMoreIcon}
                                         inputProps={{ 'aria-label': 'Without label' }}
                                         MenuProps={MenuProps}
-                                        sx={{ outline: 'none', height: '36px', width: '200px', fontSize: '0.8rem', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
+                                        sx={{ outline: 'none', height: '36px', width: '170px', fontSize: '0.8rem', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
                                     >
                                         <MenuItem key="0" value="none">
                                             All
@@ -313,10 +313,8 @@ const Leaders = () => {
                                         ))}
                                     </Select>
                                 </Box>
-                            </Box>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <p className="select-narrator">Team</p>
+                                    <p className="select-narrator">Teams</p>
                                     <Select
                                         value={values.teamFilter}
                                         onChange={handleChange('teamFilter')}
@@ -325,7 +323,7 @@ const Leaders = () => {
                                         IconComponent={ExpandMoreIcon}
                                         inputProps={{ 'aria-label': 'Without label' }}
                                         MenuProps={MenuProps}
-                                        sx={{ outline: 'none', height: '36px', width: '300px', fontSize: '0.8rem', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
+                                        sx={{ outline: 'none', height: '36px', width: '220px', fontSize: '0.8rem', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
                                     >
                                         <MenuItem key="0" value="none">
                                             All
@@ -347,7 +345,7 @@ const Leaders = () => {
                                         IconComponent={ExpandMoreIcon}
                                         inputProps={{ 'aria-label': 'Without label' }}
                                         MenuProps={MenuProps}
-                                        sx={{ outline: 'none', height: '36px', width: '300px', fontSize: '0.8rem', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
+                                        sx={{ outline: 'none', height: '36px', width: '110px', fontSize: '0.8rem', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
                                     >
                                         <MenuItem key="0" value="total">
                                             Total
@@ -357,32 +355,34 @@ const Leaders = () => {
                                         </MenuItem>
                                     </Select>
                                 </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Autocomplete
+                                        id="combo-box-demo"
+                                        options={playersList}
+                                        value={values.playerFilter}
+                                        isOptionEqualToValue={(option, value) => option && option.name}
+                                        getOptionLabel={(option) => (!option.name ? '' : option.name)}
+                                        renderOption={(props, option) => {
+                                            return (
+                                                <li {...props} key={option.id}>
+                                                    {option.name}
+                                                </li>
+                                            );
+                                        }}
+                                        renderInput={(params) => <TextField {...params} label="Player" sx={{ my: 1 }} />}
+                                        onChange={(event, newValue) => setValues({ ...values, playerFilter: newValue })}
+                                        sx={{
+                                            width: '210px',
+                                            fontSize: '0.8rem',
+                                            '& .MuiOutlinedInput-root': { padding: '0 0 0 9px' },
+                                            '& .MuiInputLabel-root': { top: '-8px' }
+                                        }}
+                                    />
+                                </Box>
                             </Box>
-                            <Autocomplete
-                                id="combo-box-demo"
-                                options={playersList}
-                                value={values.playerFilter}
-                                isOptionEqualToValue={(option, value) => option && option.name}
-                                getOptionLabel={(option) => (!option.name ? '' : option.name)}
-                                renderOption={(props, option) => {
-                                    return (
-                                        <li {...props} key={option.id}>
-                                            {option.name}
-                                        </li>
-                                    );
-                                }}
-                                renderInput={(params) => <TextField {...params} label="Player" sx={{ my: 1 }} />}
-                                onChange={(event, newValue) => setValues({ ...values, playerFilter: newValue })}
-                                sx={{
-                                    width: '300px',
-                                    fontSize: '0.8rem',
-                                    '& .MuiOutlinedInput-root': { padding: '0 0 0 9px' },
-                                    '& .MuiInputLabel-root': { top: '-8px' }
-                                }}
-                            />
                         </Box>
                     </Box>
-                    <Box sx={{ width: '100%', maxHeight: '80vh', overflowY: 'auto' }}>
+                    <Box sx={{ width: '100%', maxHeight: '85vh', overflowY: 'auto' }}>
                         <Box sx={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto', gap: '4px' }}>
                             {statCategory.map((item) => (
                                 <LeadersPlayerStatColumn

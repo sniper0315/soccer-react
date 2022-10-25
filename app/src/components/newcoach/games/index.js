@@ -186,7 +186,7 @@ const Games = () => {
             )}
             {!values.loading && (
                 <>
-                    <Box sx={{ padding: '24px 24px 24px 48px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <Box sx={{ padding: '24px 24px 24px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                             <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.4rem', fontWeight: 700, color: '#1a1b1d' }}>Games</Typography>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: '24px' }}>

@@ -13,12 +13,12 @@ const LeadersPlayerStatColumn = ({ list, title, option, isTotal, onClick }) => {
     const [isFull, setIsFull] = useState(false);
 
     return (
-        <div style={{ width: '340px', borderRadius: '8px', border: '1px solid #E8E8E8', justifyContent: 'space-between', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ width: '100%', borderRadius: '8px', border: '1px solid #E8E8E8', justifyContent: 'space-between', display: 'flex', flexDirection: 'column' }}>
             <div>
                 <div style={{ width: '100%', height: '40px', borderRadius: '8px', background: '#0A7304', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <p className="leaders-column-title">{title}</p>
                 </div>
-                <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+                <div style={{ maxHeight: '530px', overflowY: 'auto' }}>
                     {(isFull ? filteredList : filteredList.slice(0, 5)).map((item, index) => (
                         <LeadersPlayerStatItem key={index} player={item} option={option} isTotal={isTotal} onShow={onClick} />
                     ))}

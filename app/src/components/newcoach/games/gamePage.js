@@ -48,7 +48,7 @@ const GamePage = () => {
             )}
             {values.loadingDone && (
                 <>
-                    <Box sx={{ padding: '24px 24px 24px 48px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <Box sx={{ padding: '24px 24px 24px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: '24px', 'svg path': { fill: 'black' } }}>
                                 <Link to="/new_coach/games">

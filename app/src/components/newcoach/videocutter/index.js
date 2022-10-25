@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 
 import EditFolderTreeView from '../edits/treeview';
 import VCVideoPlayer from './videoplayer';
 import EditTagTable from '../edits/tagtable';
 import GameService from '../../../services/game.service';
+import '../coach_style.css';
 
 const VideoCutter = () => {
     const [curEdit, setCurEdit] = useState(null);
@@ -55,8 +56,8 @@ const VideoCutter = () => {
 
     return (
         <Box sx={{ width: '98%', margin: '0 auto' }}>
-            <Box sx={{ padding: '24px 24px 48px 48px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.4rem', fontWeight: 700, color: '#1a1b1d' }}>Video Cutter</Typography>
+            <Box sx={{ padding: '24px 24px 24px 24px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                <p className="page-title">Video Cutter</p>
             </Box>
             <Box sx={{ display: 'flex', maxHeight: '85vh', height: '85vh', background: 'white', overflowY: 'auto' }}>
                 <div style={{ display: 'flex', padding: '12px 0' }}>

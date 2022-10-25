@@ -63,10 +63,10 @@ const Corrections = () => {
             )}
             {!loading && (
                 <>
-                    <Box sx={{ padding: '24px 24px 48px 48px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                    <Box sx={{ padding: '24px 24px 24px 24px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
                         <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.4rem', fontWeight: 700, color: '#1a1b1d' }}>Corrections</Typography>
                     </Box>
-                    <Box sx={{ maxHeight: '80vh', overflowY: 'auto', width: '100%' }}>
+                    <Box sx={{ maxHeight: '85vh', overflowY: 'auto', width: '100%' }}>
                         {corrections.map((item, index) => (
                             <Box
                                 key={index}
