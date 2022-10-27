@@ -746,6 +746,12 @@ const getTeamsStatsAdvanced = (req) => {
     });
 };
 
+const getTeamsStatsGamebyGame = (req) => {
+    return axios.post(API_URL + `team/getteamsstats/game`, req, { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
 const getSeasonById = (id) => {
     return axios.get(API_URL + `season/${id}`, { headers: authHeader(), data: { id } }).then((response) => {
         return response.data;
@@ -789,8 +795,20 @@ const getPlayersStats = (seasonId, leagueId, gameId, teamId, playerId) => {
         });
 };
 
+const getPlayersDetection = (gameId, videoTime) => {
+    return axios.get(API_URL + `player/player_detection/${gameId}/${videoTime}`, { headers: authHeader(), data: { gameId, videoTime } }).then((response) => {
+        return response.data;
+    });
+};
+
 const getPlayersStatsAdvanced = (req) => {
     return axios.post(API_URL + `player/getplayersstats/advance`, req, { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const getPlayersStatsGamebyGame = (req) => {
+    return axios.post(API_URL + `player/getplayersstats/game`, req, { headers: authHeader() }).then((response) => {
         return response.data;
     });
 };
@@ -928,6 +946,7 @@ const gameService = {
     getEditClipsByUserEditId,
     getTeamById,
     getTeamsStatsAdvanced,
+    getTeamsStatsGamebyGame,
     getSeasonById,
     getLeagueById,
     getPlayerById,
@@ -1015,6 +1034,8 @@ const gameService = {
     getGameDetailssByPlayer,
     getPlayersStats,
     getPlayersStatsAdvanced,
+    getPlayersStatsGamebyGame,
+    getPlayersDetection,
     addCorrectionRequest,
     getCorrectionRequest,
     doCorrection,

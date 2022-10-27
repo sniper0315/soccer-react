@@ -257,8 +257,7 @@ export default function Tagging() {
                 setPlayerTagList([]);
                 return;
             }
-            setCurTeamTag(res[0]);
-            player.current.seekTo(toSecond(res[0].start_time));
+            setState({ curTeamTagId: res[0].id });
             dispPlayerTags(res[0].id);
         });
     }, [game_id, tagCnt]);
@@ -350,9 +349,11 @@ export default function Tagging() {
     };
 
     const addTeamTag = async (isCP) => {
+       
         try {
             const res = await GameService.addTeamTag({
                 ...teamTag,
+                
                 end_time: isCP ? toHHMMSS(player.current.getCurrentTime()) : teamTag.end_time
             });
             setModalOpen(false);
@@ -396,6 +397,7 @@ export default function Tagging() {
             await addPlayerTag({ ...pTag, team_tag_id: tTag.id });
         }
         setTempPlayerTagList([]);
+        
         dispPlayerTags(tTag.id);
     };
 
@@ -456,8 +458,6 @@ export default function Tagging() {
         setCurTagStatusText(displayTagInfo());
     }, [state.curTeamTagId]);
 
-    console.log('#########', curTeamTag, curTagStatusText);
-
     return (
         <Box sx={{ display: 'flex' }}>
             <Modal disableAutoFocus open={modalOpen} onClose={() => setModalOpen(false)} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
@@ -487,10 +487,10 @@ export default function Tagging() {
             <CssBaseline />
             <Drawer
                 sx={{
-                    width: '30%',
+                    width: '33%',
                     flexShrink: 0,
                     '& .MuiDrawer-paper': {
-                        width: '30%',
+                        width: '33%',
                         boxSizing: 'border-box'
                     }
                 }}
@@ -506,7 +506,7 @@ export default function Tagging() {
                         setCurTeamTag(row);
                         player.current.seekTo(toSecond(row?.start_time));
                         dispPlayerTags(row?.id);
-                        console.log('tagging => ', teamTagList, row);
+                       
                     }}
                     selectedId={state.curTeamTagId}
                 />
@@ -523,7 +523,7 @@ export default function Tagging() {
             </Drawer>
 
             <Main open={open}>
-                <div style={{ width: 50 }}>
+                <div style={{ width: 30 }}>
                     <Tooltip title={`${open ? 'Close' : 'Open'} Tags`}>
                         <IconButton color="inherit" aria-label="open drawer" onClick={handleDrawerOpen} edge="start" sx={{ height: 50, width: 50, position: 'fixed', zIndex: 1300, top: '45%' }}>
                             {open ? <KeyboardArrowLeftIcon /> : <KeyboardArrowRightIcon />}
@@ -531,7 +531,7 @@ export default function Tagging() {
                     </Tooltip>
                 </div>
                 <Box>
-                    <div style={{ maxWidth: '88%', margin: 'auto', position: 'relative' }}>
+                    <div style={{ maxWidth: '92%', margin: 'auto', position: 'relative' }}>
                         <div className="player-wrapper">
                             <ReactPlayer
                                 className="react-player"
@@ -549,7 +549,7 @@ export default function Tagging() {
                             />
                         </div>
                         {curTagStatusText !== '' && (
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', position: 'absolute', top: '28px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', position: 'absolute', top: '10px' }}>
                                 <div style={{ background: 'blue', width: 'fit-content', padding: '4px 8px' }}>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '20px', fontWeight: 500, color: 'white' }}>{curTagStatusText}</Typography>
                                 </div>
@@ -558,7 +558,7 @@ export default function Tagging() {
                     </div>
                     {open && (
                         <>
-                            <Box sx={{ flexGrow: 1, textAlign: 'center', marginTop: '-10px' }}>
+                            <Box sx={{ flexGrow: 1, textAlign: 'center', marginTop: '-20px' }}>
                                 <IconButton
                                     sx={{ my: 1 }}
                                     onClick={() => {
@@ -608,10 +608,10 @@ export default function Tagging() {
                                 ))}
                             </Box>
                             <div style={{ display: 'flex', justifyContent: 'center' }}>
-                                <Box sx={{ mx: 2, textAlign: 'center' }}>
+                                <Box sx={{ mx: 1, textAlign: 'center' }}>
                                     <TextField
                                         label="sec. before"
-                                        sx={{ m: 1, width: 100 }}
+                                        sx={{ m: 1, width: 90 }}
                                         inputProps={{ min: 0, style: { textAlign: 'center' } }}
                                         type="number"
                                         value={config.sec_before}
@@ -619,7 +619,7 @@ export default function Tagging() {
                                     />
                                     <TextField
                                         label="sec. after"
-                                        sx={{ m: 1, width: 100 }}
+                                        sx={{ m: 1, width: 90 }}
                                         inputProps={{ min: 0, style: { textAlign: 'center' } }}
                                         type="number"
                                         value={config.sec_after}

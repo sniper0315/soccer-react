@@ -191,9 +191,11 @@ export default function Player() {
                             />
                         </DialogContent>
                     </Dialog>
-                    {fullVideo && (
-                        <FullVideoPlayer onClose={() => setFullVideo(false)} video_url={curPlayGame ? (curPlayGame?.mobile_video_url ? curPlayGame?.mobile_video_url : curPlayGame?.video_url) : ''} />
-                    )}
+                    <Dialog className="profileSection_tagvideo" classes={{ paper: classes.paper }} open={fullVideo} onClose={(e) => setFullVideo(false)}>
+                        <DialogContent sx={{ p: 0 }}>
+                            <FullVideoPlayer video_url={curPlayGame ? (curPlayGame?.mobile_video_url ? curPlayGame?.mobile_video_url : curPlayGame?.video_url) : ''} />
+                        </DialogContent>
+                    </Dialog>
                     {playerData && <PlayerDetailCard player={playerData} />}
                     <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', padding: '18px 20px', position: 'absolute', top: '9rem' }}>
                         <IconButton onClick={(e) => setFilterAnchorEl(e.currentTarget)}>
@@ -245,8 +247,7 @@ export default function Player() {
                                     </Box>
                                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                                         <IconButton
-                                            color="primary"
-                                            sx={{ padding: 0 }}
+                                            style={{ color: 'white', backgroundColor: '#80808069', padding: 0 }}
                                             onClick={() => {
                                                 setCurPlayGame(item);
                                                 setFullVideo(true);
@@ -254,7 +255,7 @@ export default function Player() {
                                         >
                                             <PlayCircleOutlineIcon sx={{ width: '36px', height: '36px' }} />
                                         </IconButton>
-                                        <IconButton color="primary" sx={{ padding: 0 }} onClick={() => setContext({ game: item })}>
+                                        <IconButton style={{ color: 'white', backgroundColor: '#80808069', padding: 0 }} onClick={() => setContext({ game: item })}>
                                             <QueryStatsIcon sx={{ width: '36px', height: '36px' }} />
                                         </IconButton>
                                     </div>
