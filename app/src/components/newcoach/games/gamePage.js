@@ -20,7 +20,7 @@ const GamePage = () => {
         tabSelected: 0,
         loading: false,
         loadingDone: false,
-        curTab: 2
+        curTab: 0
     });
 
     const handleTabClick = (idx) => {
@@ -88,7 +88,7 @@ const GamePage = () => {
                         </Box>
                     </Box>
                     {values.curTab === 0 && <GameOverview game={values.game} />}
-                    {values.curTab === 2 && <GameStats />}
+                    {values.curTab === 2 && <GameStats game={values.game} />}
                     {values.curTab === 3 && <GamePlayers game={values.game} />}
                 </>
             )}
