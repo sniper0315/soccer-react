@@ -59,9 +59,10 @@ const CoachTeamTagTable = ({ tagList, setIndex, selectIdx, handleSort, updateTab
         setChecks(array);
     };
 
-    const handleUpdateTable = useCallback(async (index, data, newData) => {
+    const handleUpdateTable = useCallback(async (index, data) => {
+        console.log('edit####', data);
         setTableRows((prev) => update(prev, { [index]: { $set: data } }));
-        await GameService.updateEditClip(newData);
+        await GameService.updateEditClip(data);
         updateTable();
     }, []);
 
@@ -111,7 +112,7 @@ const CoachTeamTagTable = ({ tagList, setIndex, selectIdx, handleSort, updateTab
 
     return (
         <>
-            <TableContainer style={{ height: '95%', width: '100%' }}>
+            <TableContainer style={{ height: '94%', width: '100%' }}>
                 <DndProvider backend={HTML5Backend}>
                     <Table stickyHeader aria-label="sticky table">
                         <TableHead>
@@ -139,7 +140,7 @@ const CoachTeamTagTable = ({ tagList, setIndex, selectIdx, handleSort, updateTab
                     video_url={correctItem?.video_url ?? ''}
                     start={correctItem?.start_time ?? '00:00:00'}
                     end={correctItem?.end_time ?? '00:00:00'}
-                    name={correctItem?.name ?? ''}
+                    name={correctItem?.clip_name ?? ''}
                 />
             )}
         </>

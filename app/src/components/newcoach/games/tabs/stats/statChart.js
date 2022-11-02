@@ -1,17 +1,18 @@
-import { Box } from '@mui/material';
+import { Box, Tooltip, Zoom } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import '../../../coach_style.css';
 import { getComparator, stableSort } from '../../../components/utilities';
+import GameStatsVideoPlayer from './videoDialog';
 
 const GameStatsChart = ({ chartId, title, isType, action_results, list, filterText, game }) => {
     const [playerList, setPlayerList] = useState([]);
     const [hoverId, setHoverId] = useState('');
     const [videoOpen, setVideoOpen] = useState(false);
-    const [playData, setPlayData] = useState({ url: '', list: [] });
+    const [playData, setPlayData] = useState([]);
 
     const getBarWidth = (maxCount, count) => {
-        const realWidth = Math.floor((count * 100) / maxCount);
+        const realWidth = Math.floor((count * 98) / maxCount);
 
         return `${realWidth}%`;
     };
@@ -24,8 +25,33 @@ const GameStatsChart = ({ chartId, title, isType, action_results, list, filterTe
         return `${chartId}-${index}-${sId}`;
     };
 
-    const handleDisplayVideo = () => {
+    const handleDisplayVideo = (player, sId) => {
+        setPlayData(
+            player.data[sId].videoList.map((item) => {
+                return {
+                    start_time: item.player_tag_start_time,
+                    end_time: item.player_tag_end_time,
+                    player_name: item.player_names,
+                    action_name: item.action_names,
+                    action_type: item.action_type_names,
+                    action_result: item.action_result_names
+                };
+            })
+        );
         setVideoOpen(true);
+    };
+
+    const getTooltipContent = (player, sId) => {
+        return (
+            <div>
+                <p className="normal-text-white">Name: {player.name}</p>
+                <p className="normal-text-white">Action: {filterText}</p>
+                <p className="normal-text-white">
+                    {isType ? 'Type' : 'Result'}: {player.data[sId].name}
+                </p>
+                <p className="normal-text-white">Count: {player.data[sId].count}</p>
+            </div>
+        );
     };
 
     useEffect(() => {
@@ -46,9 +72,9 @@ const GameStatsChart = ({ chartId, title, isType, action_results, list, filterTe
                     const filt = includedFilterList.filter((res) => res.name === name);
 
                     if (filt.length === 0) {
-                        const count = includedData.filter((res) => (isType ? name === res.action_type_names : name === res.action_result_names)).length;
+                        const play = includedData.filter((res) => (isType ? name === res.action_type_names : name === res.action_result_names));
 
-                        includedFilterList = [...includedFilterList, { name: name, count: count, color: action_results[results.indexOf(name)].color }];
+                        includedFilterList = [...includedFilterList, { name: name, count: play.length, color: action_results[results.indexOf(name)].color, videoList: play }];
 
                         return includedFilterList;
                     }
@@ -63,10 +89,10 @@ const GameStatsChart = ({ chartId, title, isType, action_results, list, filterTe
         setPlayerList(stableSort(temp, getComparator('desc', 'count')));
     }, [list, filterText]);
 
-    console.log('chart => ', playerList);
+    console.log('chart => ', playData);
 
     return (
-        <Box id={chartId} sx={{ width: '400px', height: '272px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <Box id={chartId} sx={{ width: '100%', height: '272px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <p className="chart-title">{title}</p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', maxWidth: '100%', overflowX: 'auto', whiteSpace: 'nowrap' }}>
@@ -84,11 +110,11 @@ const GameStatsChart = ({ chartId, title, isType, action_results, list, filterTe
                         <p className="chart-primary-text" style={{ width: '30%' }}>
                             {item.name}
                         </p>
-                        <div id={`newcoach_chart-bar-${chartId}-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '70%' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '70%' }}>
                             <div style={{ display: 'flex', alignItems: 'center', width: '90%' }}>
                                 {item.data.map((skill, sId) => (
                                     <div
-                                        key={`${index}-${sId}`}
+                                        key={`${chartId}-${index}-${sId}`}
                                         style={{
                                             background: skill.color,
                                             width: getBarWidth(playerList[0].count, skill.count),
@@ -98,9 +124,11 @@ const GameStatsChart = ({ chartId, title, isType, action_results, list, filterTe
                                         }}
                                         onMouseEnter={() => handleMouseEnter(index, sId)}
                                         onMouseLeave={() => setHoverId('')}
-                                        onClick={() => handleDisplayVideo()}
+                                        onClick={() => handleDisplayVideo(item, sId)}
                                     >
-                                        <p className="chart-bar-text">{skill.count}</p>
+                                        <Tooltip arrow title={getTooltipContent(item, sId)} TransitionComponent={Zoom} placement="right">
+                                            <p className="chart-bar-text">{skill.count}</p>
+                                        </Tooltip>
                                     </div>
                                 ))}
                             </div>
@@ -111,6 +139,7 @@ const GameStatsChart = ({ chartId, title, isType, action_results, list, filterTe
                     </div>
                 ))}
             </div>
+            {videoOpen && <GameStatsVideoPlayer onClose={() => setVideoOpen(false)} video_url={game.video_url} tagList={playData} />}
         </Box>
     );
 };
