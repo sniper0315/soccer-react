@@ -4,9 +4,11 @@ import { Box, Typography, TableContainer, Table, TableHead, TableRow, TableCell,
 
 import { PLAYER_ICON_DEFAULT } from '../../../../../common/staticData';
 import { getComparator, stableSort } from '../../../components/utilities';
+import { ActionData } from '../../../components/common';
 import GameService from '../../../../../services/game.service';
 import TeamPlayerStatDialog from './status';
 import { getPeriod } from '../../../games/tabs/overview/tagListItem';
+import TeamStatsVideoPlayer from '../stats/videoDialog';
 
 const headCells = [
     { id: 'total_player_games', title: 'Games' },
@@ -27,30 +29,6 @@ const headCells = [
     { id: 'total_clearance', title: 'Clearance', action: 'Clearance' }
 ];
 
-const ActionData = {
-    Goal: { action_id: '1', action_type_id: null, action_result_id: '3' },
-    GoalOpportunity: { action_id: '1', action_type_id: null, action_result_id: '1' },
-    GoalKick: { action_id: '1', action_type_id: null, action_result_id: null },
-    FreeKick: { action_id: '1,2,3', action_type_id: '11,13', action_result_id: null },
-    KeyPass: { action_id: '2', action_type_id: '7', action_result_id: null },
-    ThroughPass: { action_id: '2', action_type_id: '6', action_result_id: null },
-    Passes: { action_id: '2', action_type_id: null, action_result_id: null },
-    Cross: { action_id: '3', action_type_id: '1,2,3,4,5,6,7,8,9,10,13,14,15', action_result_id: null },
-    Dribble: { action_id: '4', action_type_id: null, action_result_id: null },
-    Offside: { action_id: '7', action_type_id: null, action_result_id: '15' },
-    Corner: { action_id: '2,3', action_type_id: '12', action_result_id: null },
-    DrawFoul: { action_id: '6', action_type_id: null, action_result_id: null },
-    Turnover: { action_id: '2,7', action_type_id: null, action_result_id: '5,11,12,15' },
-    Saved: { action_id: '8', action_type_id: null, action_result_id: null },
-    Penalty: { action_id: '4', action_type_id: null, action_result_id: '14' },
-    Blocked: { action_id: '13', action_type_id: null, action_result_id: '7,19' },
-    Clearance: { action_id: '11', action_type_id: null, action_result_id: null },
-    Interception: { action_id: '10', action_type_id: null, action_result_id: null },
-    Tackle: { action_id: '12', action_type_id: null, action_result_id: null },
-    Foul: { action_id: '5', action_type_id: null, action_result_id: null },
-    All: { action_id: null, action_type_id: null, action_result_id: null }
-};
-
 const TeamPlayersStats = ({ playerList, stats, teamId, seasonId, gameIds, games }) => {
     const [playerIds, setPlayerIds] = useState([]);
     const [order, setOrder] = useState('desc');
@@ -60,12 +38,13 @@ const TeamPlayersStats = ({ playerList, stats, teamId, seasonId, gameIds, games 
     const [currentPlayer, setCurrentPlayer] = useState(null);
     const [playData, setPlayData] = useState([]);
     const [videoOpen, setVideoOpen] = useState(false);
-    const [videoURL, setVideoURL] = useState('');
+    const [gameList, setGameList] = useState([]);
+    const [detectStats, setDetectStats] = useState([]);
 
     const { user: currentUser } = useSelector((state) => state.auth);
 
     const getPlayerStatus = (id) => {
-        if (stats.length > 0) return stats.filter((item) => item.player_id === id)[0];
+        if (detectStats.length > 0) return detectStats.filter((item) => item.player_id === id)[0];
 
         return null;
     };
@@ -78,39 +57,26 @@ const TeamPlayersStats = ({ playerList, stats, teamId, seasonId, gameIds, games 
     };
 
     const getSortedArray = () => {
-        if (playerList.length > 0 && stats.length > 0) {
-            const sortedStats = stableSort(stats, getComparator(order, orderBy));
+        if (playerList.length > 0 && detectStats.length > 0) {
+            const sortedStats = stableSort(detectStats, getComparator(order, orderBy));
             const other = playerList.filter((item) => !playerIds.includes(item.id));
             const inside = playerList.filter((item) => playerIds.includes(item.id));
             let newList = [];
 
-            console.log('#########', inside, other);
+            sortedStats.map((item) => {
+                const newItem = inside.filter((data) => data.id === item.player_id);
 
-            if (sortedStats.length === inside.length) {
-                sortedStats.map((item) => {
-                    const newItem = playerList.filter((data) => data.id === item.player_id)[0];
+                if (newItem.length === 1) newList = [...newList, newItem[0]];
 
-                    newList = [...newList, newItem];
-
-                    return newList;
-                });
-            } else {
-                const newIds = inside.map((item) => item.id);
-                const newStats = sortedStats.filter((item) => newIds.includes(item.player_id));
-
-                newStats.map((item) => {
-                    const newItem = inside.filter((data) => data.id === item.player_id)[0];
-
-                    newList = [...newList, newItem];
-
-                    return newList;
-                });
-            }
+                return newList;
+            });
             other.map((item) => {
                 newList = [...newList, item];
 
                 return newList;
             });
+
+            console.log('#########', inside, other, newList);
 
             return newList;
         }
@@ -158,6 +124,7 @@ const TeamPlayersStats = ({ playerList, stats, teamId, seasonId, gameIds, games 
                             action_name: item.action_names,
                             action_type: item.action_type_names,
                             action_result: item.action_result_names,
+                            game_id: item.game_id,
                             period: getPeriod(item.period),
                             time: item.time_in_game,
                             home_team_image: item.home_team_logo,
@@ -167,24 +134,36 @@ const TeamPlayersStats = ({ playerList, stats, teamId, seasonId, gameIds, games 
                         };
                     })
                 );
-                // setVideoURL(games.filter((item) => item.id === gameId)[0].video_url);
+                setGameList(games.filter((item) => gameIds.includes(item.id)));
                 setVideoOpen(true);
             });
         }
     };
 
     useEffect(() => {
-        if (stats.length > 0) setPlayerIds(stats.map((item) => item.player_id));
+        if (stats.length > 0) {
+            let newArray = [];
+
+            stats.map((item) => {
+                const filt = newArray.filter((data) => item.player_id === data.player_id);
+
+                if (filt.length === 0) newArray = [...newArray, item];
+
+                return newArray;
+            });
+            setDetectStats(newArray);
+            setPlayerIds(newArray.map((item) => item.player_id));
+        }
     }, [playerList, stats]);
 
-    console.log('teams/players => ', order, orderBy, playerList);
+    console.log('teams/players => ', order, orderBy, detectStats);
 
     return (
         <Box sx={{ width: '100%', background: 'white', maxHeight: '80vh', minHeight: '65vh', overflowY: 'auto', display: 'flex', padding: '4px' }}>
             <TableContainer sx={{ maxHeight: '80vh' }}>
                 <Table stickyHeader aria-label="sticky table">
                     <TableHead>
-                        <TableRow>
+                        <TableRow height="36px">
                             <TableCell key="name" align="center" colSpan={2}>
                                 Name
                             </TableCell>
@@ -199,7 +178,7 @@ const TeamPlayersStats = ({ playerList, stats, teamId, seasonId, gameIds, games 
                     </TableHead>
                     <TableBody>
                         {getSortedArray().map((player, index) => (
-                            <TableRow key={index} height="70px">
+                            <TableRow key={index} height="70px" hover>
                                 <TableCell width="4%" align="center" sx={{ cursor: 'pointer' }} onClick={() => handleDisplayList(player)}>
                                     <img
                                         style={{ height: '70px', borderRadius: '8px', paddingTop: '2px', paddingBottom: '2px' }}
@@ -215,7 +194,7 @@ const TeamPlayersStats = ({ playerList, stats, teamId, seasonId, gameIds, games 
                                     </Box>
                                 </TableCell>
                                 {headCells.map((cell) => (
-                                    <TableCell key={cell.id} align="center" sx={{ cursor: 'pointer' }} onClick={() => handleDisplayVideo(cell.id, player?.id ?? 0)}>
+                                    <TableCell key={cell.id} align="center" sx={{ cursor: 'pointer' }} onClick={() => handleDisplayVideo(cell, player?.id ?? 0)}>
                                         {playerIds.includes(player?.id ?? 0) ? (getPlayerStatus(player?.id ?? 0) ? getPlayerStatus(player?.id ?? 0)[cell.id] : '-') : '-'}
                                     </TableCell>
                                 ))}
@@ -225,6 +204,7 @@ const TeamPlayersStats = ({ playerList, stats, teamId, seasonId, gameIds, games 
                 </Table>
             </TableContainer>
             <TeamPlayerStatDialog open={statOpen} onClose={() => setStatOpen(false)} player={currentPlayer} teamId={teamId} seasonId={seasonId} gameIds={gameIds} initialState={playerStat} />
+            {videoOpen && <TeamStatsVideoPlayer onClose={() => setVideoOpen(false)} video_url={gameList} tagList={playData} />}
         </Box>
     );
 };
