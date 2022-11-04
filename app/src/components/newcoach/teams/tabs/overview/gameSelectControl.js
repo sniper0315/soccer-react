@@ -116,7 +116,7 @@ export default function GameSelectControl({ gameList, setIds }) {
 
     return (
         <React.Fragment>
-            <SaveButton sx={{ fontWeight: 500, width: '120px', height: '28px', fontSize: '0.7rem' }} endIcon={<SettingsIcon />} disableRipple aria-describedby={id} onClick={handleClick}>
+            <SaveButton sx={{ fontWeight: 500, width: '150px', height: '28px', fontSize: '0.9rem' }} endIcon={<SettingsIcon />} disableRipple aria-describedby={id} onClick={handleClick}>
                 Select Games
             </SaveButton>
             <StyledPopper id={id} open={open} anchorEl={anchorEl} placement="bottom-start">
@@ -127,16 +127,18 @@ export default function GameSelectControl({ gameList, setIds }) {
                                 borderBottom: `1px solid ${theme.palette.mode === 'light' ? '#eaecef' : '#30363d'}`,
                                 padding: '8px 10px',
                                 fontWeight: 600,
-                                fontFamily: "'DM Sans', sans-serif"
+                                fontFamily: "'DM Sans', sans-serif",
+                                fontSize:'0.8rem'
                             }}
                         >
-                            Please select games to load tags
-                        </Box>
-                        <FormControlLabel
-                            sx={{ mt: 1, marginLeft: '11px', fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: '0.7rem' }}
+                            Please select games
+                            <FormControlLabel
+                            sx={{ mt: 1, marginLeft: '130px', fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: '0.7rem' }}
                             control={<Checkbox checked={selectAll} onChange={() => setSelectAll(!selectAll)} inputProps={{ 'aria-label': 'controlled' }} />}
                             label="Select All"
                         />
+                        </Box>
+
                         <Autocomplete
                             open
                             multiple
@@ -157,7 +159,7 @@ export default function GameSelectControl({ gameList, setIds }) {
                             renderTags={() => null}
                             noOptionsText="No Games"
                             renderOption={(props, option, { selected }) => (
-                                <li key={option.id} {...props} style={{ display: 'flex', alignItems: 'center', width: '460px' }}>
+                                <li key={option.id} {...props} style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                     <Box component={DoneIcon} sx={{ width: 17, height: 17, mr: '5px', ml: '-2px' }} style={{ visibility: selected ? 'visible' : 'hidden' }} />
                                     <div style={{ flexGrow: 1 }}>
                                         <p className="normal-text">{`${option.home_team_name} vs ${option.away_team_name}`}</p>
