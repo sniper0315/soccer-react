@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 
 import '../../../coach_style.css';
+import GameExportToEdits from '../../../games/tabs/overview/exportEdits';
 import { getPeriod } from '../../../games/tabs/overview/tagListItem';
 import TeamStatsVideoPlayer from './videoDialog';
 
@@ -27,28 +28,40 @@ const TeamStatsBoxList = ({ games, list }) => {
     const [actionList, setActionList] = useState([]);
     const [videoOpen, setVideoOpen] = useState(false);
     const [playData, setPlayData] = useState([]);
+    const [exportOpen, setExportOpen] = useState(false);
 
     const handleDisplayVideo = (player) => {
-        setPlayData(
-            player.data.map((item) => {
-                return {
-                    start_time: item.player_tag_start_time,
-                    end_time: item.player_tag_end_time,
-                    player_name: item.player_names,
-                    action_name: item.action_names,
-                    action_type: item.action_type_names,
-                    action_result: item.action_result_names,
-                    game_id: item.game_id,
-                    period: getPeriod(item.period),
-                    time: item.time_in_game,
-                    home_team_image: item.home_team_logo,
-                    away_team_image: item.away_team_logo,
-                    home_team_goals: item.home_team_goal,
-                    away_team_goals: item.away_team_goal
-                };
-            })
-        );
-        setVideoOpen(true);
+        if (player.total > 0) {
+            setPlayData(
+                player.data.map((item) => {
+                    return {
+                        start_time: item.player_tag_start_time,
+                        end_time: item.player_tag_end_time,
+                        player_name: item.player_names,
+                        action_name: item.action_names,
+                        action_type: item.action_type_names,
+                        action_result: item.action_result_names,
+                        game_id: item.game_id,
+                        period: getPeriod(item.period),
+                        time: item.time_in_game,
+                        home_team_image: item.home_team_logo,
+                        away_team_image: item.away_team_logo,
+                        home_team_goals: item.home_team_goal,
+                        away_team_goals: item.away_team_goal
+                    };
+                })
+            );
+            setVideoOpen(true);
+        }
+    };
+
+    const handleExportTags = (player) => (e) => {
+        e.preventDefault();
+
+        if (player.total > 0) {
+            setPlayData(player.data);
+            setExportOpen(true);
+        }
     };
 
     useEffect(() => {
@@ -56,21 +69,33 @@ const TeamStatsBoxList = ({ games, list }) => {
 
         boxList.map((row, rId) => {
             return row.map((item, cId) => {
-                boxList[rId][cId].total = list.filter((stat) => stat.action_names === item.id).length;
-                boxList[rId][cId].data = list.filter((stat) => stat.action_names === item.id);
+                boxList[rId][cId].total = 0;
+                boxList[rId][cId].data = [];
 
                 return boxList;
             });
         });
-        list.map((item) => {
-            const filtered = temp.filter((data) => data === item.action_names);
 
-            if (filtered.length === 0) temp = [...temp, item.action_names];
+        if (list.length > 0) {
+            boxList.map((row, rId) => {
+                return row.map((item, cId) => {
+                    boxList[rId][cId].total = list.filter((stat) => stat.action_names === item.id).length;
+                    boxList[rId][cId].data = list.filter((stat) => stat.action_names === item.id);
 
-            return temp;
-        });
-        boxList[0][0].total += list.filter((item) => item.action_names === 'Shot' && item.action_result_names === 'Goal').length;
-        boxList[0][0].data = list.filter((item) => item.action_names === 'Shot' && item.action_result_names === 'Goal');
+                    return boxList;
+                });
+            });
+            list.map((item) => {
+                const filtered = temp.filter((data) => data === item.action_names);
+
+                if (filtered.length === 0) temp = [...temp, item.action_names];
+
+                return temp;
+            });
+            boxList[0][0].total += list.filter((item) => item.action_names === 'Shot' && item.action_result_names === 'Goal').length;
+            boxList[0][0].data = list.filter((item) => item.action_names === 'Shot' && item.action_result_names === 'Goal');
+        }
+
         setActionList(temp);
     }, [list]);
 
@@ -96,6 +121,7 @@ const TeamStatsBoxList = ({ games, list }) => {
                             cursor: 'pointer'
                         }}
                         onClick={() => handleDisplayVideo(item)}
+                        onContextMenu={handleExportTags(item)}
                     >
                         <p className="normal-text">{item.title}</p>
                         <p className="normal-text">{item.total}</p>
@@ -120,6 +146,8 @@ const TeamStatsBoxList = ({ games, list }) => {
                             cursor: 'pointer'
                         }}
                         onClick={() => handleDisplayVideo(item)}
+                        onContextMenu={handleExportTags(item)}
+                        contextMenu="none"
                     >
                         <p className="normal-text">{item.title}</p>
                         <p className="normal-text">{item.total}</p>
@@ -144,6 +172,7 @@ const TeamStatsBoxList = ({ games, list }) => {
                             cursor: 'pointer'
                         }}
                         onClick={() => handleDisplayVideo(item)}
+                        onContextMenu={handleExportTags(item)}
                     >
                         <p className="normal-text">{item.title}</p>
                         <p className="normal-text">{item.total}</p>
@@ -151,6 +180,7 @@ const TeamStatsBoxList = ({ games, list }) => {
                 ))}
             </Box>
             {videoOpen && <TeamStatsVideoPlayer onClose={() => setVideoOpen(false)} video_url={games} tagList={playData} />}
+            <GameExportToEdits open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
         </Box>
     );
 };
