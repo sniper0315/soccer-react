@@ -11,6 +11,7 @@ import GamePlayerStatErrorMessage from './errorMessage';
 import { ActionData } from '../../../../components/common';
 import TeamStatsVideoPlayer from '../../stats/videoDialog';
 import { getPeriod } from '../../../../games/tabs/overview/tagListItem';
+import GameExportToEdits from '../../../../games/tabs/overview/exportEdits';
 
 const statList = [
     { id: 'goal', title: 'Goals', action: 'Goal' },
@@ -41,7 +42,8 @@ const statList = [
     { id: 'blocked', title: 'Blocked', action: 'Blocked' },
     { id: 'fouls', title: 'Fouls', action: 'Foul' },
     { id: 'yellow_cards', title: 'Yellow Cards', action: 'YellowCard' },
-    { id: 'red_cards', title: 'Red Cards', action: 'RedCard' }
+    { id: 'red_cards', title: 'Red Cards', action: 'RedCard' },
+    { id: 'player_games', title: 'Games' }
 ];
 
 const TeamPlayerOverviewStatDialog = ({ open, onClose, player, gameIds, games, teamId, initialState }) => {
@@ -56,6 +58,7 @@ const TeamPlayerOverviewStatDialog = ({ open, onClose, player, gameIds, games, t
     const [playData, setPlayData] = useState([]);
     const [gameList, setGameList] = useState([]);
     const [videoOpen, setVideoOpen] = useState(false);
+    const [exportOpen, setExportOpen] = useState(false);
 
     const { user: currentUser } = useSelector((state) => state.auth);
 
@@ -156,7 +159,7 @@ const TeamPlayerOverviewStatDialog = ({ open, onClose, player, gameIds, games, t
     };
 
     const handleDisplayVideo = (cell) => {
-        if (playerState && playerState[`total_${cell.id}`] > 0) {
+        if (playerState && playerState[`total_${cell.id}`] > 0 && cell.title !== 'Games') {
             GameService.getGamePlayerTags(
                 currentUser.id,
                 teamId,
@@ -192,6 +195,30 @@ const TeamPlayerOverviewStatDialog = ({ open, onClose, player, gameIds, games, t
                 );
                 setGameList(games.filter((item) => gameIds.includes(item.id)));
                 setVideoOpen(true);
+            });
+        }
+    };
+
+    const handleExportTags = (cell) => (e) => {
+        e.preventDefault();
+
+        if (playerState && playerState[`total_${cell.id}`] > 0 && cell.title !== 'Games') {
+            GameService.getGamePlayerTags(
+                currentUser.id,
+                teamId,
+                `${player.player_id}`,
+                gameIds.join(','),
+                ActionData[cell.action].action_id,
+                ActionData[cell.action].action_type_id,
+                ActionData[cell.action].action_result_id
+            ).then((res) => {
+                let data = res;
+
+                if (cell.title === 'Shots In The Box') data = res.filter((item) => item.inside_the_pain === true);
+                else if (cell.title === 'Shots Out Of The Box') data = res.filter((item) => item.inside_the_pain === false);
+
+                setPlayData(data);
+                setExportOpen(true);
             });
         }
     };
@@ -333,6 +360,7 @@ const TeamPlayerOverviewStatDialog = ({ open, onClose, player, gameIds, games, t
                                     cursor: 'pointer'
                                 }}
                                 onClick={() => handleDisplayVideo(item)}
+                                onContextMenu={handleExportTags(item)}
                             >
                                 <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 500, color: '#1a1b1d' }}>{item.title}</Typography>
                                 <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 500, color: '#1a1b1d' }}>
@@ -345,6 +373,7 @@ const TeamPlayerOverviewStatDialog = ({ open, onClose, player, gameIds, games, t
             </DialogContent>
             <GamePlayerStatErrorMessage open={errorOpen} onClose={() => setErrorOpen(false)} />
             {videoOpen && <TeamStatsVideoPlayer onClose={() => setVideoOpen(false)} video_url={gameList} tagList={playData} />}
+            <GameExportToEdits open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
         </Dialog>
     );
 };
