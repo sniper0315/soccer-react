@@ -53,6 +53,7 @@ const Sidebar = () => {
         else if (pathname.includes('/new_coach/opponents')) setSelectIndex(paths.indexOf('/new_coach/opponents'));
         else if (pathname.includes('/new_coach/leaders')) setSelectIndex(paths.indexOf('/new_coach/leaders'));
         else if (pathname.includes('/new_coach/players')) setSelectIndex(paths.indexOf('/new_coach/players'));
+        else if (pathname.includes('/new_coach/goalkeepers')) setSelectIndex(paths.indexOf('/new_coach/goalkeepers'));
         else if (pathname.includes('/new_coach/settings')) setSelectIndex(paths.indexOf('/new_coach/settings'));
         else if (pathname.includes('/new_coach/video_cutter')) setSelectIndex(paths.indexOf('/new_coach/video_cutter'));
         else setSelectIndex(paths.indexOf('/new_coach/corrections'));
@@ -80,7 +81,7 @@ const Sidebar = () => {
                         </Link>
                     )}
                 </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {menuList.map((menuItem, idx) => (
                         <Box key={idx} onMouseEnter={() => handleMouseEnter(idx)} onMouseLeave={handleMouseLeave} onClick={() => setSelectIndex(idx)}>
                             <MenuItem
