@@ -75,46 +75,30 @@ const TeamStatsVideoPlayer = ({ open, onClose, video_url, tagList }) => {
     };
 
     useEffect(() => {
-        let videos = [];
-
+        setVideoList([]);
         video_url.map((game) => {
             if (game.video_url.startsWith('https://www.youtube.com')) {
                 gameService.getNewStreamURL(game.video_url).then((res) => {
-                    videos = [...videos, { url: res.url, id: game.id }];
+                    setVideoList((old) => [...old, { id: game.id, url: res.url }]);
                 });
-            } else if (game.video_url.toLowerCase() !== 'no video') videos = [...videos, { url: game.video_url, id: game.id }];
+            } else if (game.video_url.toLowerCase() !== 'no video') setVideoList((old) => [...old, { id: game.id, url: game.video_url }]);
         });
-
-        if (videos.length > 0) setVideoList(videos);
     }, [video_url]);
 
     useEffect(() => {
-        if (video_url.length > 0 && tagList.length > 0) {
-            let videos = [];
+        setCurrentIndex(0);
 
-            video_url.map((game) => {
-                if (game.video_url.startsWith('https://www.youtube.com')) {
-                    gameService.getNewStreamURL(game.video_url).then((res) => {
-                        videos = [...videos, { url: res.url, id: game.id }];
-                    });
-                } else if (game.video_url.toLowerCase() !== 'no video') videos = [...videos, { url: game.video_url, id: game.id }];
-            });
+        if (videoList.length > 0) setVideoURL(videoList.filter((item) => item.id === tagList[0].game_id)[0].url);
+    }, [open]);
 
-            if (videos.length > 0) {
-                setVideoList(videos);
-                setVideoURL(videos.filter((item) => item.id === tagList[0].game_id)[0].url);
-            }
-        }
-    }, [tagList, video_url, open]);
-
-    console.log('video====', videoURL, tagList);
+    console.log('Daniel====', videoList, tagList, videoURL);
 
     return (
-        <Dialog style={{ minWidth: '98%', backgroundColor: 'transparent' }} className="profileSection_tagvideo" open={open} onClose={() => onClose(updated > 0)}>
+        <Dialog style={{ backgroundColor: 'transparent' }} className="profileSection_tagvideo" open={open} onClose={() => onClose(updated > 0)}>
             <DialogContent style={{ p: 0 }}>
-                <div style={{ width: '80%', margin: 'auto', position: 'relative' }}>
+                <div style={{ width: '100%', margin: 'auto', position: 'relative' }}>
                     <FullScreen handle={handle}>
-                        <div style={{ width: '100%', margin: 'auto' }}>
+                        <div style={{ width: '100%', margin: 'auto', minWidth: '700px' }}>
                             <div className="player-wrapper">
                                 <ReactPlayer
                                     className="react-player"
@@ -142,9 +126,9 @@ const TeamStatsVideoPlayer = ({ open, onClose, video_url, tagList }) => {
                                 justifyContent: 'space-between'
                             }}
                         >
-                            <div style={{ display: 'flex', alignItems: 'center', flex: 5.5 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', flex: 6 }}>
                                 <div
-                                    style={{ display: 'flex', alignItems: 'center', flex: 0.5 }}
+                                    style={{ display: 'flex', alignItems: 'center', flex: 0 }}
                                     onClick={() => {
                                         setPlay(false);
                                         setTagEditOpen(true);
@@ -152,17 +136,17 @@ const TeamStatsVideoPlayer = ({ open, onClose, video_url, tagList }) => {
                                 >
                                     <EditIcon style={{ color: 'red', padding: 3, borderRadius: 60, textAlign: 'center', cursor: 'pointer' }} />
                                 </div>
-                                <FormControlLabel control={<Switch checked={showLogo} onChange={(e) => setShowLogo(e.target.checked)} />} label="" sx={{ color: 'white', margin: 0, flex: 1 }} />
-                                {tagList.length > 0 && showLogo && (
+                                <FormControlLabel control={<Switch checked={showLogo} onChange={(e) => setShowLogo(e.target.checked)} />} label="" sx={{ color: 'white', margin: 0, flex: 0 }} />
+                                {tagList.length > 0 && currentIndex < tagList.length && showLogo && (
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center', flex: 4 }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'blue', width: '150px' }}>
-                                            <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '24px', fontWeight: 500, color: 'white' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'blue', width: '100px' }}>
+                                            <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.4rem', fontWeight: 500, color: 'white' }}>
                                                 {`${tagList[currentIndex].period} - ${tagList[currentIndex].time}'`}
                                             </Typography>
                                         </div>
                                         <img src={tagList[currentIndex].home_team_image ? tagList[currentIndex].home_team_image : TEAM_ICON_DEFAULT} style={{ width: '56px', height: '56px' }} />
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white', width: '90px' }}>
-                                            <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '24px', fontWeight: 500, color: 'blue' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'white', width: '80px' }}>
+                                            <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.4rem', fontWeight: 500, color: 'blue' }}>
                                                 {`${tagList[currentIndex].home_team_goals} : ${tagList[currentIndex].away_team_goals}`}
                                             </Typography>
                                         </div>
@@ -204,9 +188,9 @@ const TeamStatsVideoPlayer = ({ open, onClose, video_url, tagList }) => {
                                     <SkipNextSharpIcon />
                                 </IconButton>
                             </div>
-                            {tagList.length > 0 && (
+                            {tagList.length > 0 && currentIndex < tagList.length && (
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px 12px', background: '#80808069' }}>
-                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '16px', fontWeight: 500, color: 'white' }}>
+                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '1.2rem', fontWeight: 500, color: 'white' }}>
                                         {`${tagList[currentIndex].player_name}, ${tagList[currentIndex].action_name}, ${tagList[currentIndex].action_type}, ${tagList[currentIndex].action_result}`}
                                     </Typography>
                                 </div>

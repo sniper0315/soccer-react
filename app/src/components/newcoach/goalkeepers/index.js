@@ -1,41 +1,40 @@
 import React, { useEffect, useState } from 'react';
-import { Box, CircularProgress, Divider, Popover, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel } from '@mui/material';
+import { Box, CircularProgress, Divider, MenuItem, Popover, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel } from '@mui/material';
 import { useSelector } from 'react-redux';
 
 import EditIcon from '@mui/icons-material/EditOutlined';
 import QueryStatsIcon from '@mui/icons-material/QueryStats';
 import SportsSoccerIcon from '@mui/icons-material/SportsSoccer';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMoreOutlined';
 
 import GameService from '../../../services/game.service';
 import { PLAYER_ICON_DEFAULT } from '../../../common/staticData';
 import { getComparator, stableSort } from '../components/utilities';
-import { ActionData } from '../components/common';
+import { ActionData, MenuProps } from '../components/common';
 import { getPeriod } from '../games/tabs/overview/tagListItem';
 import PlayerEditDialog from '../players/playerEditDialog';
-import TeamPlayerStatDialog from '../teams/tabs/players/status';
 import TeamStatsVideoPlayer from '../teams/tabs/stats/videoDialog';
 import GameExportToEdits from '../games/tabs/overview/exportEdits';
-import PlayersGamesDialog from '../players/gamesDialog';
+import GoalkeepersGamesDialog from './gamesDialog';
+import GoalkeeperStatDialog from './status';
 
 import '../coach_style.css';
 
 const headCells = [
-    { id: 'total_player_games', title: 'Games' },
-    { id: 'total_goal', title: 'Goals', action: 'Goal' },
-    { id: 'total_shot', title: 'Shots', action: 'GoalKick' },
-    { id: 'total_dribble', title: 'Dribbles', action: 'Dribble' },
-    { id: 'total_crosses', title: 'Crosses', action: 'Cross' },
-    { id: 'total_corner', title: 'Corners', action: 'Corner' },
-    { id: 'total_free_kick', title: 'Free Kicks', action: 'FreeKick' },
-    { id: 'total_passes', title: 'Passes', action: 'Passes' },
-    { id: 'total_turnover', title: 'Turnovers', action: 'Turnover' },
-    { id: 'total_fouls', title: 'Fouls', action: 'Foul' },
-    { id: 'total_draw_fouls', title: 'Draw Fouls', action: 'DrawFoul' },
-    { id: 'total_interception', title: 'Interceptions', action: 'Interception' },
-    { id: 'total_tackle', title: 'Tackles', action: 'Tackle' },
+    { id: 'total_player_games', title: 'Games Played', action: '' },
+    { id: 'total_build_ups', title: 'Build Ups', action: 'BuildUp' },
+    { id: 'total_short_passes', title: 'Short Passes', action: 'ShortPass' },
+    { id: 'total_long_passes', title: 'Long Passes', action: 'LongPass' },
+    { id: 'total_super_save', title: 'Super Saved', action: 'SuperSaved' },
     { id: 'total_saved', title: 'Saved', action: 'Saved' },
-    { id: 'total_blocked', title: 'Blocked', action: 'Blocked' },
-    { id: 'total_clearance', title: 'Clearance', action: 'Clearance' }
+    { id: 'total_goalkeeper_exit', title: 'Exits', action: 'Exits' },
+    { id: 'total_air_challenge', title: 'Air Challenges', action: 'AirChallenge' },
+    { id: 'total_ground_challenge', title: 'Ground Challenges', action: 'GroundChallenge' },
+    { id: 'total_one_vs_one', title: '1 vs 1', action: 'One' },
+    { id: 'total_goal_received', title: 'Goals Received', action: 'GoalReceive' },
+    { id: 'total_opponent_crosses', title: 'Opponents Crosses', action: '' },
+    { id: 'total_opponent_corners', title: 'Opponents Corners', action: '' },
+    { id: 'total_opponent_free_kicks', title: 'Opponents Free Kicks', action: '' }
 ];
 
 const Goalkeepers = () => {
@@ -54,6 +53,12 @@ const Goalkeepers = () => {
     const [exportOpen, setExportOpen] = useState(false);
     const [playerGames, setPlayerGames] = useState([]);
     const [gamesOpen, setGamesOpen] = useState(false);
+    const [values, setValues] = useState({
+        teamList: [],
+        seasonList: [],
+        teamFilter: 'none',
+        seasonFilter: 'none'
+    });
 
     const [menuAnchorEl, setMenuAnchorEl] = useState(null);
     const menuPopoverOpen = Boolean(menuAnchorEl);
@@ -68,8 +73,18 @@ const Goalkeepers = () => {
         setOrderBy(prop);
     };
 
+    const getFilteredList = () => {
+        let list = [];
+
+        if (values.seasonFilter !== 'none' && values.teamFilter === 'none') list = goalkeeperList.filter((item) => item.season_name === values.seasonFilter.name);
+        else if (values.seasonFilter === 'none' && values.teamFilter !== 'none') list = goalkeeperList.filter((item) => item.team_name === values.teamFilter);
+        else list = goalkeeperList.filter((item) => item.season_name === values.seasonFilter.name && item.team_name === values.teamFilter);
+
+        return values.seasonFilter === 'none' && values.teamFilter === 'none' ? goalkeeperList : list;
+    };
+
     const getSortedArray = () => {
-        return stableSort(goalkeeperList, getComparator(order, orderBy));
+        return stableSort(getFilteredList(), getComparator(order, orderBy));
     };
 
     const handleShowMenu = (player) => (e) => {
@@ -95,7 +110,7 @@ const Goalkeepers = () => {
     };
 
     const handleDisplayVideo = (cell, player) => async (e) => {
-        if (cell.title !== 'Games' && player[cell.id] !== undefined && player[cell.id] > 0) {
+        if (cell.action !== '' && player[cell.id] !== undefined && player[cell.id] > 0) {
             let gameIds = [];
 
             await GameService.getAllGamesByCoach(player.season_id, null, player.team_id, null).then((res) => {
@@ -113,9 +128,12 @@ const Goalkeepers = () => {
                 ActionData[cell.action].action_type_id,
                 ActionData[cell.action].action_result_id
             ).then((res) => {
+                const flist = cell.title === 'Exits' ? res.filter((item) => item.inside_the_pain === false) : res;
+
                 setPlayData(
-                    res.map((item) => {
+                    flist.map((item) => {
                         return {
+                            tag_id: item.id,
                             start_time: item.player_tag_start_time,
                             end_time: item.player_tag_end_time,
                             player_name: item.player_names,
@@ -123,6 +141,9 @@ const Goalkeepers = () => {
                             action_type: item.action_type_names,
                             action_result: item.action_result_names,
                             game_id: item.game_id,
+                            team_id: player.team_id,
+                            court_area: item.court_area_id,
+                            inside_pain: item.inside_the_pain,
                             period: getPeriod(item.period),
                             time: item.time_in_game,
                             home_team_image: item.home_team_logo,
@@ -132,7 +153,8 @@ const Goalkeepers = () => {
                         };
                     })
                 );
-                setVideoOpen(true);
+
+                if (flist.length > 0) setVideoOpen(true);
             });
         }
     };
@@ -140,7 +162,7 @@ const Goalkeepers = () => {
     const handleExportPlayerTags = (cell, player) => async (e) => {
         e.preventDefault();
 
-        if (cell.title !== 'Games' && player[cell.id] !== undefined && player[cell.id] > 0) {
+        if (cell.action !== '' && player[cell.id] !== undefined && player[cell.id] > 0) {
             let gameIds = [];
 
             await GameService.getAllGamesByCoach(player.season_id, null, player.team_id, null).then((res) => {
@@ -158,8 +180,11 @@ const Goalkeepers = () => {
                 ActionData[cell.action].action_type_id,
                 ActionData[cell.action].action_result_id
             ).then((res) => {
-                setPlayData(res);
-                setExportOpen(true);
+                const flist = cell.title === 'Exits' ? res.filter((item) => item.inside_the_pain === false) : res;
+
+                setPlayData(flist);
+
+                if (flist.length > 0) setExportOpen(true);
             });
         }
     };
@@ -171,7 +196,7 @@ const Goalkeepers = () => {
         await GameService.getAllGamesByCoach(playerStat.season_id, null, playerStat.team_id, null).then((res) => {
             gameIds = res.map((item) => item.id);
         });
-        await GameService.getPlayersStatsGamebyGame({
+        await GameService.getGoalkeepersStatsGamebyGame({
             seasonId: playerStat.season_id,
             leagueId: null,
             gameId: gameIds.length === 0 ? null : gameIds.join(','),
@@ -183,9 +208,20 @@ const Goalkeepers = () => {
             homeAway: null,
             gameResult: null
         }).then((res) => {
+            console.log('$$$$$$$$$', res);
             setPlayerGames(stableSort(res, getComparator('desc', 'game_date')));
             setGamesOpen(true);
         });
+    };
+
+    const getDisplayName = (player) => {
+        if (player) {
+            if (player.player_jersey_number === 999) return player.player_position;
+
+            return `#${player.player_jersey_number} ${player.player_position}`;
+        }
+
+        return '-';
     };
 
     const getLeagueIds = (array) => {
@@ -224,6 +260,42 @@ const Goalkeepers = () => {
         return [];
     };
 
+    const getTeamList = (array) => {
+        if (array.length > 0) {
+            let result = [];
+
+            array.map((item) => {
+                const filter = result.filter((team) => team === item.team_name);
+
+                if (filter.length === 0) result = [...result, item.team_name];
+
+                return result;
+            });
+
+            return result;
+        }
+
+        return [];
+    };
+
+    const getSeasonList = (array) => {
+        if (array.length > 0) {
+            let result = [];
+
+            array.map((item) => {
+                const filter = result.filter((team) => team.name === item.season_name);
+
+                if (filter.length === 0) result = [...result, { name: item.season_name, id: item.season_id }];
+
+                return result;
+            });
+
+            return result;
+        }
+
+        return [];
+    };
+
     useEffect(async () => {
         let leagueIds = [];
         let teamIds = [];
@@ -237,8 +309,8 @@ const Goalkeepers = () => {
         });
 
         if (teamIds.length > 0) {
-            await GameService.getPlayersStatsAdvanceSummary({
-                seasonId: null,
+            await GameService.getGoalkeepersStatsAdvanceSummary({
+                seasonId: values.seasonFilter === 'none' ? null : values.seasonFilter.id,
                 leagueId: leagueIds.length > 0 ? leagueIds.join(',') : null,
                 gameId: null,
                 teamId: teamIds.join(','),
@@ -249,18 +321,69 @@ const Goalkeepers = () => {
                 homeAway: null,
                 gameResult: null
             }).then((res) => {
-                setGoalkeeperList(res.filter((item) => item.player_position === 'Goalkeeper'));
+                const list = res.filter((item) => item.player_position === 'Goalkeeper');
+
+                setGoalkeeperList(list);
+
+                if (values.seasonList.length === 0 || values.teamList.length === 0) setValues({ ...values, teamList: getTeamList(list), seasonList: getSeasonList(list) });
+
                 setLoading(false);
             });
         } else setLoading(false);
-    }, []);
+    }, [values.seasonFilter]);
 
-    console.log('Goals => ', goalkeeperList);
+    console.log('Goals => ', goalkeeperList, values.seasonFilter);
 
     return (
         <Box sx={{ width: '98%', margin: '0 auto' }}>
-            <Box sx={{ padding: '24px 24px 24px 24px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
+            <Box sx={{ padding: '24px 24px 24px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <p className="page-title">Goalkeepers</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <p className="normal-text">Season</p>
+                        <Select
+                            value={values.seasonFilter}
+                            onChange={(e) => setValues({ ...values, seasonFilter: e.target.value })}
+                            label=""
+                            variant="outlined"
+                            IconComponent={ExpandMoreIcon}
+                            inputProps={{ 'aria-label': 'Without label' }}
+                            MenuProps={MenuProps}
+                            sx={{ outline: 'none', height: '36px', width: '200px', fontSize: '0.8rem', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
+                        >
+                            <MenuItem key="0" value="none">
+                                All
+                            </MenuItem>
+                            {values.seasonList.map((season, index) => (
+                                <MenuItem key={index + 1} value={season}>
+                                    {season.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <p className="normal-text">Team</p>
+                        <Select
+                            value={values.teamFilter}
+                            onChange={(e) => setValues({ ...values, teamFilter: e.target.value })}
+                            label=""
+                            variant="outlined"
+                            IconComponent={ExpandMoreIcon}
+                            inputProps={{ 'aria-label': 'Without label' }}
+                            MenuProps={MenuProps}
+                            sx={{ outline: 'none', height: '36px', width: '300px', fontSize: '0.8rem', '& legend': { display: 'none' }, '& fieldset': { top: 0 } }}
+                        >
+                            <MenuItem key="0" value="none">
+                                All
+                            </MenuItem>
+                            {values.teamList.map((team, index) => (
+                                <MenuItem key={index + 1} value={team}>
+                                    {team}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </Box>
+                </div>
             </Box>
             {loading && (
                 <div style={{ width: '100%', height: '100%', zIndex: 9999, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -268,8 +391,8 @@ const Goalkeepers = () => {
                 </div>
             )}
             {!loading && goalkeeperList.length > 0 && (
-                <Box sx={{ height: '80vh', marginLeft: '10px', background: 'white' }}>
-                    <TableContainer sx={{ maxHeight: '80vh' }}>
+                <Box sx={{ height: '85vh', marginLeft: '10px', background: 'white' }}>
+                    <TableContainer sx={{ maxHeight: '85vh' }}>
                         <Table stickyHeader aria-label="sticky table">
                             <TableHead>
                                 <TableRow height="36px">
@@ -297,27 +420,24 @@ const Goalkeepers = () => {
                                                 src={player ? (player.image_url.length > 0 ? player.image_url : PLAYER_ICON_DEFAULT) : PLAYER_ICON_DEFAULT}
                                             />
                                         </TableCell>
-                                        <TableCell key={`${player.player_id}-${index}-1`}>
+                                        <TableCell key={`${player.player_id}-${index}-1`} sx={{ width: '115px' }}>
                                             <Box sx={{ paddingLeft: '10px', cursor: 'pointer' }} onClick={handleShowMenu(player)}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                    <p className="normal-text">#{player?.player_jersey_number ?? 0}</p>
-                                                    <p className="normal-text">{player?.player_name ?? '-'}</p>
-                                                </div>
-                                                <p className="normal-text">{player?.player_position ?? '-'}</p>
+                                                <p className="normal-text">{player?.player_name ?? '-'}</p>
+                                                <p className="normal-text">{getDisplayName(player)}</p>
                                             </Box>
                                         </TableCell>
-                                        <TableCell key={`${player.player_id}-${index}-2`} align="center">
-                                            {player?.team_name ?? '-'}
+                                        <TableCell key={`${player.player_id}-${index}-2`} sx={{ width: '160px' }} align="center">
+                                            <p className="normal-text"> {player?.team_name ?? '-'}</p>
                                         </TableCell>
                                         {headCells.map((cell, cId) => (
                                             <TableCell
                                                 key={`${cell.id}-${index}-${cId}`}
                                                 align="center"
-                                                sx={{ cursor: 'pointer' }}
+                                                sx={{ cursor: 'pointer', width: '55px' }}
                                                 onClick={handleDisplayVideo(cell, player)}
                                                 onContextMenu={handleExportPlayerTags(cell, player)}
                                             >
-                                                {player[cell.id] ?? '-'}
+                                                <p className="normal-text"> {player[cell.id] ?? '-'}</p>
                                             </TableCell>
                                         ))}
                                     </TableRow>
@@ -326,7 +446,7 @@ const Goalkeepers = () => {
                         </Table>
                     </TableContainer>
                     <PlayerEditDialog open={editOpen} onClose={() => setEditOpen(false)} player={editPlayer} />
-                    <TeamPlayerStatDialog
+                    <GoalkeeperStatDialog
                         open={statOpen}
                         onClose={() => setStatOpen(false)}
                         player={currentPlayer}
@@ -336,9 +456,9 @@ const Goalkeepers = () => {
                         gameIds={gameList.map((item) => item.id)}
                         initialState={playerStat}
                     />
-                    {videoOpen && <TeamStatsVideoPlayer onClose={() => setVideoOpen(false)} video_url={gameList} tagList={playData} />}
+                    <TeamStatsVideoPlayer open={videoOpen} onClose={() => setVideoOpen(false)} video_url={gameList} tagList={playData} />
                     <GameExportToEdits open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
-                    <PlayersGamesDialog open={gamesOpen} onClose={() => setGamesOpen(false)} list={playerGames} playerName={playerStat?.player_name ?? ''} />
+                    <GoalkeepersGamesDialog open={gamesOpen} onClose={() => setGamesOpen(false)} list={playerGames} playerName={playerStat?.player_name ?? ''} teamId={playerStat?.team_id ?? 0} />
                     <Popover
                         id={menuPopoverId}
                         open={menuPopoverOpen}

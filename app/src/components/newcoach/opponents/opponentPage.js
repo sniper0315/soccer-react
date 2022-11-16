@@ -79,7 +79,7 @@ const OpponentPage = () => {
                                     onClick={() => handleTabClick(index)}
                                     sx={{ display: 'flex', justifyContent: 'center', flexDirection: 'column', gap: '4px', width: 'fit-content', cursor: 'pointer' }}
                                 >
-                                    <p className="page-tab">{tab}</p>
+                                    <p className="page-tab-title">{tab}</p>
                                     <Box sx={{ width: '100%', height: '2px', backgroundColor: values.curTab === index ? '#0A7304' : '#F8F8F8' }} />
                                 </Box>
                             ))}

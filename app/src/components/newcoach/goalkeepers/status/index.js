@@ -2,16 +2,16 @@ import { Box, Button, Dialog, DialogContent, ToggleButton, ToggleButtonGroup, Ty
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import MatchAll from '../../../../../../assets/match_all.png';
+import MatchAll from '../../../../assets/match_all.png';
 
-import { USER_IMAGE_DEFAULT } from '../../../../../../common/staticData';
-import { getFormattedDate } from '../../../../components/utilities';
-import GameService from '../../../../../../services/game.service';
-import { ActionData } from '../../../../components/common';
-import TeamStatsVideoPlayer from '../../stats/videoDialog';
-import GameExportToEdits from '../../../../games/tabs/overview/exportEdits';
-import { getPeriod } from '../../../../games/tabs/overview/tagListItem';
-import GamePlayerStatErrorMessage from '../../../../games/tabs/players/status/errorMessage';
+import { USER_IMAGE_DEFAULT } from '../../../../common/staticData';
+import { ActionData } from '../../components/common';
+import GameExportToEdits from '../../games/tabs/overview/exportEdits';
+import { getPeriod } from '../../games/tabs/overview/tagListItem';
+import GamePlayerStatErrorMessage from '../../games/tabs/players/status/errorMessage';
+import TeamStatsVideoPlayer from '../../teams/tabs/stats/videoDialog';
+import GameService from '../../../../services/game.service';
+import { getFormattedDate } from '../../components/utilities';
 
 const statList = [
     { id: 'goal', title: 'Goals', action: 'Goal' },
@@ -43,10 +43,23 @@ const statList = [
     { id: 'fouls', title: 'Fouls', action: 'Foul' },
     { id: 'yellow_cards', title: 'Yellow Cards', action: 'YellowCard' },
     { id: 'red_cards', title: 'Red Cards', action: 'RedCard' },
-    { id: 'player_games', title: 'Games' }
+    { id: 'build_ups', title: 'Build Ups', action: 'BuildUp' },
+    { id: 'short_passes', title: 'Short Passes', action: 'ShortPass' },
+    { id: 'long_passes', title: 'Long Passes', action: 'LongPass' },
+    { id: 'super_save', title: 'Super Saved', action: 'SuperSaved' },
+    { id: 'saved', title: 'Saved', action: 'Saved' },
+    { id: 'goalkeeper_exit', title: 'Exits', action: 'Exits' },
+    { id: 'air_challenge', title: 'Air Challenges', action: 'AirChallenge' },
+    { id: 'ground_challenge', title: 'Ground Challenges', action: 'GroundChallenge' },
+    { id: 'one_vs_one', title: '1 vs 1', action: 'One' },
+    { id: 'goal_received', title: 'Goals Received', action: 'GoalReceive' },
+    { id: 'opponent_crosses', title: 'Opponents Crosses', action: '' },
+    { id: 'opponent_corners', title: 'Opponents Corners', action: '' },
+    { id: 'opponent_free_kicks', title: 'Opponents Free Kicks', action: '' },
+    { id: 'player_games', title: 'Games', action: '' }
 ];
 
-const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, gameIds, initialState }) => {
+const GoalkeeperStatDialog = ({ open, onClose, player, teamId, seasonId, games, gameIds, initialState }) => {
     const [playerState, setPlayerState] = useState(null);
     const [gameHalf, setGameHalf] = useState(['first', 'second']);
     const [gameTime, setGameTime] = useState(['1', '2', '3', '4', '5', '6']);
@@ -127,7 +140,7 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
     const getPlayerStat = (id) => {
         if (id === 'player_games') return playerState[`total_${id}`];
 
-        return playerState[`total_${id}`] + ' (' + playerState[`average_${id}`] + ')';
+        return playerState[`total_${id}`] ? playerState[`total_${id}`] : '0' + ' (' + playerState[`average_${id}`] ? playerState[`average_${id}`] : '0' + ')';
     };
 
     const handleChangeCourtArea = (courtId) => {
@@ -166,7 +179,7 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
     };
 
     const handleDisplayVideo = (cell) => {
-        if (playerState && playerState[`total_${cell.id}`] > 0 && cell.title !== 'Games') {
+        if (playerState && playerState[`total_${cell.id}`] > 0 && cell.action !== '') {
             GameService.getGamePlayerTags(
                 currentUser.id,
                 teamId,
@@ -180,6 +193,7 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
 
                 if (cell.title === 'Shots In The Box') data = res.filter((item) => item.inside_the_pain === true);
                 else if (cell.title === 'Shots Out Of The Box') data = res.filter((item) => item.inside_the_pain === false);
+                else if (cell.title === 'Exits') data = res.filter((item) => item.inside_the_pain === false);
 
                 setPlayData(
                     data.map((item) => {
@@ -204,7 +218,9 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
                         };
                     })
                 );
-                setVideoOpen(true);
+                setGameList(games.filter((item) => gameIds.includes(item.id)));
+
+                if (data.length > 0) setVideoOpen(true);
             });
         }
     };
@@ -212,7 +228,7 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
     const handleExportTags = (cell) => (e) => {
         e.preventDefault();
 
-        if (playerState && playerState[`total_${cell.id}`] > 0 && cell.title !== 'Games') {
+        if (playerState && playerState[`total_${cell.id}`] > 0 && cell.action !== '') {
             GameService.getGamePlayerTags(
                 currentUser.id,
                 teamId,
@@ -226,9 +242,11 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
 
                 if (cell.title === 'Shots In The Box') data = res.filter((item) => item.inside_the_pain === true);
                 else if (cell.title === 'Shots Out Of The Box') data = res.filter((item) => item.inside_the_pain === false);
+                else if (cell.title === 'Exits') data = res.filter((item) => item.inside_the_pain === false);
 
                 setPlayData(data);
-                setExportOpen(true);
+
+                if (data.length > 0) setExportOpen(true);
             });
         }
     };
@@ -241,13 +259,9 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
     }, [initialState, open]);
 
     useEffect(() => {
-        setGameList(games.filter((item) => gameIds.includes(item.id)));
-    }, [games, gameIds]);
-
-    useEffect(() => {
         if (player && gameIds.length > 0) {
             setLoading(true);
-            GameService.getPlayersStatsAdvanced({
+            GameService.getGoalkeepersStatsAdvanced({
                 seasonId: seasonId,
                 leagueId: null,
                 gameId: gameIds.length === 0 ? null : gameIds.join(','),
@@ -377,33 +391,35 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
                 </Box>
                 <Box sx={{ border: '1px solid #E8E8E8', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '16px', fontWeight: 600, color: '#1a1b1d' }}>PLAYER STATS</Typography>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto', gap: '8px' }}>
-                        {statList.map((item, index) => (
-                            <div
-                                key={index}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    flexDirection: 'column',
-                                    gap: '4px',
-                                    padding: '6px 0',
-                                    width: '160px',
-                                    height: '60px',
-                                    borderRadius: '12px',
-                                    border: '1px solid #E8E8E8',
-                                    background: loading ? 'white' : playerState ? (playerState[`total_${item.id}`] > 0 ? '#F2F7F2' : 'white') : 'white',
-                                    cursor: 'pointer'
-                                }}
-                                onClick={() => handleDisplayVideo(item)}
-                                onContextMenu={handleExportTags(item)}
-                            >
-                                <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 500, color: '#1a1b1d' }}>{item.title}</Typography>
-                                <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 500, color: '#1a1b1d' }}>
-                                    {!loading ? (playerState ? getPlayerStat(item.id) : '0') : '0'}
-                                </Typography>
-                            </div>
-                        ))}
+                    <div style={{ maxHeight: '460px', overflowY: 'auto' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto', gap: '8px' }}>
+                            {statList.map((item, index) => (
+                                <div
+                                    key={index}
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexDirection: 'column',
+                                        gap: '4px',
+                                        padding: '6px 0',
+                                        width: '160px',
+                                        height: '60px',
+                                        borderRadius: '12px',
+                                        border: '1px solid #E8E8E8',
+                                        background: loading ? 'white' : playerState ? (playerState[`total_${item.id}`] > 0 ? '#F2F7F2' : 'white') : 'white',
+                                        cursor: 'pointer'
+                                    }}
+                                    onClick={() => handleDisplayVideo(item)}
+                                    onContextMenu={handleExportTags(item)}
+                                >
+                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 500, color: '#1a1b1d' }}>{item.title}</Typography>
+                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 500, color: '#1a1b1d' }}>
+                                        {!loading ? (playerState ? getPlayerStat(item.id) : '0') : '0'}
+                                    </Typography>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </Box>
             </DialogContent>
@@ -423,4 +439,4 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
     );
 };
 
-export default TeamPlayerStatDialog;
+export default GoalkeeperStatDialog;
