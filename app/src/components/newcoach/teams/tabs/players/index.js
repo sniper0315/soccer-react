@@ -244,7 +244,13 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games }) => {
                                         onClick={() => handleDisplayVideo(cell, player?.id ?? 0)}
                                         onContextMenu={handleExportTags(cell, player?.id ?? 0)}
                                     >
-                                        {playerIds.includes(player?.id ?? 0) ? (getPlayerStatus(player?.id ?? 0) ? getPlayerStatus(player?.id ?? 0)[cell.id] : '-') : '-'}
+                                        {playerIds.includes(player?.id ?? 0)
+                                            ? getPlayerStatus(player?.id ?? 0)
+                                                ? cell.id === 'total_saved'
+                                                    ? getPlayerStatus(player?.id ?? 0)[cell.id] + getPlayerStatus(player?.id ?? 0)['total_super_save']
+                                                    : getPlayerStatus(player?.id ?? 0)[cell.id]
+                                                : '-'
+                                            : '-'}
                                     </TableCell>
                                 ))}
                             </TableRow>

@@ -11,7 +11,7 @@ import OpponentPlayers from './tabs/players';
 import { getFormattedDate } from '../components/utilities';
 import '../coach_style.css';
 
-const Tabs = ['Overview', 'Summary', 'Stats', 'Players'];
+const Tabs = ['Overview', 'Players'];
 
 const OpponentPage = () => {
     const params = useParams();
@@ -86,7 +86,7 @@ const OpponentPage = () => {
                         </Box>
                     </Box>
                     {values.curTab === 0 && <OpponentOverview game={values.game} />}
-                    {values.curTab === 3 && <OpponentPlayers game={values.game} />}
+                    {values.curTab === 1 && <OpponentPlayers game={values.game} />}
                 </>
             )}
         </Box>

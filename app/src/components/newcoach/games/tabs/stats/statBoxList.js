@@ -48,8 +48,12 @@ const GameStatsBoxList = ({ game, list }) => {
 
         boxList.map((row, rId) => {
             return row.map((item, cId) => {
-                boxList[rId][cId].total = list.filter((stat) => stat.action_names === item.id).length;
-                boxList[rId][cId].data = list.filter((stat) => stat.action_names === item.id);
+                boxList[rId][cId].total =
+                    item.id === 'Saved'
+                        ? list.filter((stat) => stat.action_names === 'Saved' || stat.action_names === 'Super Saved').length
+                        : list.filter((stat) => stat.action_names === item.id).length;
+                boxList[rId][cId].data =
+                    item.id === 'Saved' ? list.filter((stat) => stat.action_names === 'Saved' || stat.action_names === 'Super Saved') : list.filter((stat) => stat.action_names === item.id);
 
                 return boxList;
             });
