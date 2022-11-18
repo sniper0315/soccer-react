@@ -107,8 +107,6 @@ const TeamStatsBoxList = ({ games, list, teamId, refreshPage }) => {
         setActionList(temp);
     }, [list]);
 
-    console.log('game stats boxlist => ', boxList, actionList);
-
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', paddingTop: '0px', paddingBottom: '20px' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>

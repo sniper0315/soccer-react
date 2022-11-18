@@ -80,8 +80,6 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games }) => {
                 return newList;
             });
 
-            console.log('#########', inside, other, newList);
-
             return newList;
         }
 
@@ -90,22 +88,41 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games }) => {
 
     const handleDisplayList = (player) => {
         if (gameIds.length > 0) {
-            GameService.getPlayersStatsAdvanced({
-                seasonId: seasonId,
-                leagueId: null,
-                gameId: gameIds.join(','),
-                teamId: teamId,
-                playerId: player.id,
-                gameTime: '1,2,3,4,5,6',
-                courtAreaId: '1,2,3,4',
-                insidePaint: null,
-                homeAway: null,
-                gameResult: null
-            }).then((res) => {
-                setCurrentPlayer(player);
-                setPlayerStat(res[0]);
-                setStatOpen(true);
-            });
+            if (player.pos_name === 'Goalkeeper') {
+                GameService.getGoalkeepersStatsAdvanceSummary({
+                    seasonId: seasonId,
+                    leagueId: null,
+                    gameId: gameIds.join(','),
+                    teamId: teamId,
+                    playerId: player.id,
+                    gameTime: '1,2,3,4,5,6',
+                    courtAreaId: '1,2,3,4',
+                    insidePaint: null,
+                    homeAway: null,
+                    gameResult: null
+                }).then((res) => {
+                    setCurrentPlayer(player);
+                    setPlayerStat(res[0]);
+                    setStatOpen(true);
+                });
+            } else {
+                GameService.getPlayersStatsAdvanced({
+                    seasonId: seasonId,
+                    leagueId: null,
+                    gameId: gameIds.join(','),
+                    teamId: teamId,
+                    playerId: player.id,
+                    gameTime: '1,2,3,4,5,6',
+                    courtAreaId: '1,2,3,4',
+                    insidePaint: null,
+                    homeAway: null,
+                    gameResult: null
+                }).then((res) => {
+                    setCurrentPlayer(player);
+                    setPlayerStat(res[0]);
+                    setStatOpen(true);
+                });
+            }
         } else window.alert("No selected games. Please click 'Select Games' button to select.");
     };
 
@@ -120,7 +137,6 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games }) => {
                 ActionData[cell.action].action_type_id,
                 ActionData[cell.action].action_result_id
             ).then((res) => {
-                console.log('team games => ', res);
                 setPlayData(
                     res.map((item) => {
                         return {
@@ -198,8 +214,6 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games }) => {
             setPlayerIds(newArray.map((item) => item.player_id));
         });
     }, [refresh, gameIds]);
-
-    console.log('teams/players => ', order, orderBy, detectStats);
 
     return (
         <Box sx={{ width: '100%', background: 'white', maxHeight: '80vh', minHeight: '65vh', overflowY: 'auto', display: 'flex', padding: '4px' }}>

@@ -563,7 +563,7 @@ exports.getPlayersGames = (req, res) => {
 
   Sequelize.query(
     `
-  select * from public.get_players_games(
+  select * from public.fnc_get_players_games(
     ${req.params.season},
     ${teams},
     ${players},
@@ -587,7 +587,7 @@ exports.getPlayersTeams = (req, res) => {
 
   Sequelize.query(
     `
-  select * from public.get_players_teams(
+  select * from public.fnc_get_players_teams(
     ${req.params.season},
     ${players},
     ${req.userId}
