@@ -56,7 +56,10 @@ const GoalkeepersGamesDialog = ({ open, onClose, list, playerName, teamId }) => 
                 `${cell.game_id}`,
                 ActionData[prop.action].action_id,
                 ActionData[prop.action].action_type_id,
-                ActionData[prop.action].action_result_id
+                ActionData[prop.action].action_result_id,
+                null,
+                null,
+                null
             ).then((res) => {
                 const flist = cell.title === 'Exits' ? res.filter((item) => item.inside_the_pain === false) : res;
 
@@ -101,7 +104,10 @@ const GoalkeepersGamesDialog = ({ open, onClose, list, playerName, teamId }) => 
                 `${cell.game_id}`,
                 ActionData[prop.action].action_id,
                 ActionData[prop.action].action_type_id,
-                ActionData[prop.action].action_result_id
+                ActionData[prop.action].action_result_id,
+                null,
+                null,
+                null
             ).then((res) => {
                 const flist = cell.title === 'Exits' ? res.filter((item) => item.inside_the_pain === false) : res;
 
@@ -137,7 +143,7 @@ const GoalkeepersGamesDialog = ({ open, onClose, list, playerName, teamId }) => 
                         <TableBody>
                             {list.map((item, index) => (
                                 <TableRow key={index} height="36px" hover>
-                                    <TableCell key={`${index}-game`} align="center" width="348px">
+                                    <TableCell key={`${index}-game`} align="center">
                                         <div>
                                             <p className="normal-text">{`${item.season_name}, ${item.league_name}`}</p>
                                             <p className="normal-text">{`${getFormattedDate(item.game_date)} VS ${getAwayTeamName(item)}`}</p>

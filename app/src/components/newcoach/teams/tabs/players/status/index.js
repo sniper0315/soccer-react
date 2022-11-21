@@ -13,7 +13,7 @@ import GameExportToEdits from '../../../../games/tabs/overview/exportEdits';
 import { getPeriod } from '../../../../games/tabs/overview/tagListItem';
 import GamePlayerStatErrorMessage from '../../../../games/tabs/players/status/errorMessage';
 
-const statList = [
+export const statList = [
     { id: 'goal', title: 'Goals', action: 'Goal' },
     { id: 'shot', title: 'Shots', action: 'GoalKick' },
     { id: 'penalties', title: 'Penalties', action: 'Penalty' },
@@ -43,7 +43,7 @@ const statList = [
     { id: 'fouls', title: 'Fouls', action: 'Foul' },
     { id: 'yellow_cards', title: 'Yellow Cards', action: 'YellowCard' },
     { id: 'red_cards', title: 'Red Cards', action: 'RedCard' },
-    { id: 'player_games', title: 'Games' }
+    { id: 'player_games', title: 'Games', action: '' }
 ];
 
 const goalkeeper = [
@@ -215,7 +215,10 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
                 gameIds.join(','),
                 ActionData[cell.action].action_id,
                 ActionData[cell.action].action_type_id,
-                ActionData[cell.action].action_result_id
+                ActionData[cell.action].action_result_id,
+                gameTime.length === 0 ? null : gameTime.join(','),
+                courtArea.length === 0 ? null : courtArea.join(','),
+                null
             ).then((res) => {
                 let data = res;
 
@@ -261,7 +264,10 @@ const TeamPlayerStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
                 gameIds.join(','),
                 ActionData[cell.action].action_id,
                 ActionData[cell.action].action_type_id,
-                ActionData[cell.action].action_result_id
+                ActionData[cell.action].action_result_id,
+                gameTime.length === 0 ? null : gameTime.join(','),
+                courtArea.length === 0 ? null : courtArea.join(','),
+                null
             ).then((res) => {
                 let data = res;
 
