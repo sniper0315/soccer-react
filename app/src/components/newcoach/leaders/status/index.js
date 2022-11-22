@@ -8,7 +8,7 @@ import { USER_IMAGE_DEFAULT } from '../../../../common/staticData';
 import { getFormattedDate } from '../../components/utilities';
 import GameService from '../../../../services/game.service';
 import GamePlayerStatErrorMessage from '../../games/tabs/players/status/errorMessage';
-import { statList } from '../../teams/tabs/players/status';
+import { goalkeeper, statList } from '../../teams/tabs/players/status';
 import { getPeriod } from '../../games/tabs/overview/tagListItem';
 import { ActionData } from '../../components/common';
 import TeamStatsVideoPlayer from '../../teams/tabs/stats/videoDialog';
@@ -113,21 +113,40 @@ const LeadersPlayerStatDialog = ({ open, onClose, player }) => {
         }
 
         setLoading(true);
-        GameService.getPlayersStatsAdvanced({
-            seasonId: player?.season_id ?? null,
-            leagueId: null,
-            gameId: null,
-            teamId: player?.team_id ?? null,
-            playerId: player?.player_id ?? null,
-            gameTime: gameTime.join(','),
-            courtAreaId: courtArea.join(','),
-            insidePaint: null,
-            homeAway: gamePlace ? parseInt(gamePlace) : null,
-            gameResult: gameResult ? parseInt(gameResult) : null
-        }).then((res) => {
-            setPlayerState(res[0]);
-            setLoading(false);
-        });
+
+        if (player.player_position === 'Goalkeeper') {
+            GameService.getGoalkeepersStatsAdvanceSummary({
+                seasonId: player?.season_id ?? null,
+                leagueId: null,
+                gameId: null,
+                teamId: player?.team_id ?? null,
+                playerId: player?.player_id ?? null,
+                gameTime: gameTime.join(','),
+                courtAreaId: courtArea.join(','),
+                insidePaint: null,
+                homeAway: gamePlace ? parseInt(gamePlace) : null,
+                gameResult: gameResult ? parseInt(gameResult) : null
+            }).then((res) => {
+                setPlayerState(res[0]);
+                setLoading(false);
+            });
+        } else {
+            GameService.getPlayersStatsAdvanced({
+                seasonId: player?.season_id ?? null,
+                leagueId: null,
+                gameId: null,
+                teamId: player?.team_id ?? null,
+                playerId: player?.player_id ?? null,
+                gameTime: gameTime.join(','),
+                courtAreaId: courtArea.join(','),
+                insidePaint: null,
+                homeAway: gamePlace ? parseInt(gamePlace) : null,
+                gameResult: gameResult ? parseInt(gameResult) : null
+            }).then((res) => {
+                setPlayerState(res[0]);
+                setLoading(false);
+            });
+        }
     };
 
     const handleDisplayVideo = async (cell) => {
@@ -185,35 +204,79 @@ const LeadersPlayerStatDialog = ({ open, onClose, player }) => {
         }
     };
 
+    const getStatList = () => {
+        if (player) return player.player_position === 'Goalkeeper' ? goalkeeper : statList;
+
+        return statList;
+    };
+
     useEffect(() => {
         setPlayerState(player);
         setGameHalf(['first', 'second']);
         setGameTime(['1', '2', '3', '4', '5', '6']);
         setCourtArea(['1', '2', '3', '4']);
-    }, [player, open]);
 
-    useEffect(() => {
-        if (player) {
+        if (player && player.player_position === 'Goalkeeper') {
             setLoading(true);
-            GameService.getPlayersStatsAdvanced({
+            GameService.getGoalkeepersStatsAdvanceSummary({
                 seasonId: player?.season_id ?? null,
                 leagueId: null,
                 gameId: null,
                 teamId: player?.team_id ?? null,
                 playerId: player?.player_id ?? null,
-                gameTime: gameTime.length === 0 ? null : gameTime.join(','),
-                courtAreaId: courtArea.length === 0 ? null : courtArea.join(','),
+                gameTime: '1,2,3,4,5,6',
+                courtAreaId: '1,2,3,4',
                 insidePaint: null,
-                homeAway: gamePlace ? parseInt(gamePlace) : null,
-                gameResult: gameResult ? parseInt(gameResult) : null
+                homeAway: null,
+                gameResult: null
             }).then((res) => {
                 setPlayerState(res[0]);
                 setLoading(false);
             });
         }
+    }, [player, open]);
+
+    useEffect(() => {
+        if (player) {
+            setLoading(true);
+
+            if (player.player_position === 'Goalkeeper') {
+                GameService.getGoalkeepersStatsAdvanceSummary({
+                    seasonId: player?.season_id ?? null,
+                    leagueId: null,
+                    gameId: null,
+                    teamId: player?.team_id ?? null,
+                    playerId: player?.player_id ?? null,
+                    gameTime: gameTime.length === 0 ? null : gameTime.join(','),
+                    courtAreaId: courtArea.length === 0 ? null : courtArea.join(','),
+                    insidePaint: null,
+                    homeAway: gamePlace ? parseInt(gamePlace) : null,
+                    gameResult: gameResult ? parseInt(gameResult) : null
+                }).then((res) => {
+                    setPlayerState(res[0]);
+                    setLoading(false);
+                });
+            } else {
+                GameService.getPlayersStatsAdvanced({
+                    seasonId: player?.season_id ?? null,
+                    leagueId: null,
+                    gameId: null,
+                    teamId: player?.team_id ?? null,
+                    playerId: player?.player_id ?? null,
+                    gameTime: gameTime.length === 0 ? null : gameTime.join(','),
+                    courtAreaId: courtArea.length === 0 ? null : courtArea.join(','),
+                    insidePaint: null,
+                    homeAway: gamePlace ? parseInt(gamePlace) : null,
+                    gameResult: gameResult ? parseInt(gameResult) : null
+                }).then((res) => {
+                    setPlayerState(res[0]);
+                    setLoading(false);
+                });
+            }
+        }
     }, [refresh]);
 
-    console.log('leaders => ', playData, player);
+    console.log('leaders/stat => ', playerState);
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="1500px">
@@ -247,12 +310,6 @@ const LeadersPlayerStatDialog = ({ open, onClose, player }) => {
                                 <div style={{ display: 'flex', alignItems: 'center' }}>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d', flex: 1 }}>Position</Typography>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 500, color: '#1a1b1d', flex: 1 }}>{player?.player_position ?? ''}</Typography>
-                                </div>
-                                <div style={{ display: 'flex', alignItems: 'center' }}>
-                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 600, color: '#1a1b1d', flex: 1 }}>Birth date</Typography>
-                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '14px', fontWeight: 500, color: '#1a1b1d', flex: 1 }}>
-                                        {getFormattedDate(player?.date_of_birth ?? '1970-01-01')}
-                                    </Typography>
                                 </div>
                             </div>
                         </Box>
@@ -333,7 +390,7 @@ const LeadersPlayerStatDialog = ({ open, onClose, player }) => {
                 <Box sx={{ border: '1px solid #E8E8E8', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '16px', fontWeight: 600, color: '#1a1b1d' }}>PLAYER STATS</Typography>
                     <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto auto', gap: '8px' }}>
-                        {statList.map((item, index) => (
+                        {getStatList().map((item, index) => (
                             <div
                                 key={index}
                                 style={{
