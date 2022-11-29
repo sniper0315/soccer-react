@@ -33,8 +33,6 @@ import GameExportToEdits from '../games/tabs/overview/exportEdits';
 import GoalkeepersGamesDialog from './gamesDialog';
 import GoalkeeperStatDialog from './status';
 
-import '../coach_style.css';
-
 const headCells = [
     { id: 'total_player_games', title: 'Games Played', action: '' },
     { id: 'total_build_ups', title: 'Build Ups', action: 'BuildUp' },
@@ -153,6 +151,8 @@ const Goalkeepers = () => {
                     ActionData[cell.action].action_result_id,
                     null,
                     null,
+                    null,
+                    null,
                     null
                 ).then((res) => {
                     setPlayData(
@@ -190,6 +190,8 @@ const Goalkeepers = () => {
                     ActionData[cell.action].action_id,
                     ActionData[cell.action].action_type_id,
                     ActionData[cell.action].action_result_id,
+                    null,
+                    null,
                     null,
                     null,
                     null
@@ -248,6 +250,8 @@ const Goalkeepers = () => {
                     ActionData[cell.action].action_result_id,
                     null,
                     null,
+                    null,
+                    null,
                     null
                 ).then((res) => {
                     setPlayData(res);
@@ -263,6 +267,8 @@ const Goalkeepers = () => {
                     ActionData[cell.action].action_id,
                     ActionData[cell.action].action_type_id,
                     ActionData[cell.action].action_result_id,
+                    null,
+                    null,
                     null,
                     null,
                     null

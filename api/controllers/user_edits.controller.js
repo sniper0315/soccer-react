@@ -1,11 +1,14 @@
 const db = require("../models");
+const config = require("../config/auth.config");
 const User_Edits = db.user_edits;
 const User_Edits_Folder = db.user_edits_folders;
 const Edit_Clips = db.edit_clips;
+const Email_Queue = db.email_queue;
 const Op = db.Sequelize.Op;
 const Sequelize = db.sequelize;
 
 var bcrypt = require("bcryptjs");
+var CryptoJS = require("crypto-js");
 
 exports.create = async (req, res) => {
   if (!req.body.name) {
@@ -203,12 +206,177 @@ exports.findAllFolders = (req, res) => {
     });
 };
 
+sendShareEmail = async (origin, email, userId, subject, html) => {
+  const sendgrid = require("@sendgrid/mail");
+  sendgrid.setApiKey(process.env.SENDGRID_API_KEY);
+
+  const msg = {
+    to: email, // Change to your recipient
+    from: origin, // Change to your verified sender
+    subject: subject,
+    html: html,
+  };
+
+  const email_queue = await Email_Queue.create({
+    user_id: userId,
+    user_email: email,
+    send_date: new Date(),
+    subject: subject,
+    content: html,
+  });
+
+  sendgrid
+    .send(msg)
+    .then((resp) => {
+      Email_Queue.update({ success: true }, { where: { id: email_queue.id } });
+    })
+    .catch((error) => {
+      console.error(error);
+      Email_Queue.update({ success: false }, { where: { id: email_queue.id } });
+    });
+};
+
+exports.sendShareEmail = (req, res) => {
+  const text = req.body.text.split("\n").join("<br/>");
+
+  console.log("$$$$$$$$", req.body);
+  Sequelize.query(
+    `SELECT * FROM public."Users" WHERE public."Users".id=${req.userId}`
+  )
+    .then((data) => {
+      const user = data[0][0];
+      const ciphertext = encodeURIComponent(
+        CryptoJS.AES.encrypt(`${req.body.share_id}`, config.secret).toString()
+      );
+      const url = `https://soccer.scouting4u.com/shareedit/${ciphertext}`;
+      const emails = req.body.email.split(", ");
+
+      emails.map((email) => {
+        var html = `<!DOCTYPE html>
+            <html>
+              <head>
+                <meta charset="UTF-8">
+              </head>
+              <body>
+                <div style="border: 1px solid lightblue; padding: 10px; width:540px;">
+                <a href="${url}"><img src="https://soccer-s4u-bucket.s3.eu-west-1.amazonaws.com/images/EmailThumbnail.gif" alt="" style="width: 540px;" /></a>
+                <h2>${req.body.edit_name}</h2>
+                <h4>Author: ${user.first_name} ${user.last_name}</h4>
+                <p>${text}</p>
+              </div>
+              <br/>
+              <br/>
+              <div>
+              <p>This message has been sent as a data shared between ${user.first_name} ${user.last_name} and the addressee whose name is specified above. 
+              The content of this email is confidential and intended for the recipient specified in message only. 
+              It is strictly forbidden to share any part of this message with any third party, without a written consent of the sender. 
+              If you received this message by mistake, please reply to this message and follow with its deletion, so that we can ensure such a mistake does not occur in the future.</p>
+              <br/>
+              <p><b>Warning:</b> Although taking reasonable precautions to ensure no viruses or malicious software are present in this email, the Scouting4U cannot accept responsibility for any loss or damage arising from the use of this email or attachments!</p> 
+              </div>
+            </body>
+          </html>`;
+
+        sendShareEmail(
+          user.email,
+          email,
+          req.userId,
+          `A new share from ${user.first_name} ${user.last_name}`,
+          html
+        );
+        sendShareEmail(
+          user.email,
+          user.email,
+          req.userId,
+          `A new share from ${user.first_name} ${user.last_name}`,
+          html
+        );
+        sendShareEmail(
+          user.email,
+          "scouting4u2010@gmail.com",
+          req.userId,
+          `A new share from ${user.first_name} ${user.last_name}`,
+          html
+        );
+      });
+      res.status(200).send({
+        message: `Shared successfully, Please check the shared url.`,
+      });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving UserEdits.",
+      });
+    });
+};
+
+exports.getShareURL = (req, res) => {
+  Sequelize.query(
+    `
+  select * from public."User_Edits" where public."User_Edits".user_id=${req.userId} and public."User_Edits".id=${req.params.id}
+  `
+  )
+    .then((data) => {
+      const ciphertext = encodeURIComponent(
+        CryptoJS.AES.encrypt(`${data[0][0].share_id}`, config.secret).toString()
+      );
+      const url = `https://soccer.scouting4u.com/shareedit/${ciphertext}`;
+
+      res.send(url);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving UserEdits.",
+      });
+    });
+};
+
+exports.verifyShareId = (req, res) => {
+  var bytes = CryptoJS.AES.decrypt(
+    decodeURIComponent(req.body.code),
+    config.secret
+  );
+  var data = bytes.toString(CryptoJS.enc.Utf8);
+
+  Sequelize.query(
+    `SELECT * FROM public."User_Edits" WHERE public."User_Edits".share_id='${data}'`
+  )
+    .then((data) => {
+      res.send(data[0]);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving UserEdits.",
+      });
+    });
+};
+
 exports.findOne = (req, res) => {
   const id = req.params.id;
 
   Sequelize.query(
     `
   select * from public.fnc_get_clips_in_edits(${id}) order by sort asc
+  `
+  )
+    .then((data) => {
+      res.send(data[0]);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving UserEdits.",
+      });
+    });
+};
+
+exports.getEditbyId = (req, res) => {
+  Sequelize.query(
+    `
+  select * from public."User_Edits" where public."User_Edits".user_id=${req.userId} and public."User_Edits".id=${req.params.id}
   `
   )
     .then((data) => {
@@ -280,7 +448,6 @@ exports.updateEditClip = (req, res) => {
 };
 
 exports.update = async (req, res) => {
-
   const id = req.params.id;
 
   const num = await User_Edits.update(req.body, { where: { id: id } });

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TreeView, TreeItem } from '@mui/lab';
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { Box, Typography, Button, CircularProgress, Divider, Popover, Snackbar, Alert } from '@mui/material';
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -9,13 +9,16 @@ import EditsIcon from '../../../../assets/Edits.svg';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShareIcon from '@mui/icons-material/Share';
-import DesktopWindowsIcon from '@mui/icons-material/DesktopWindows';
+import DesktopWindowsIcon from '@mui/icons-material/DesktopWindowsOutlined';
+import EmailIcon from '@mui/icons-material/EmailOutlined';
+import ChatBubbleIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 
 import GameService from '../../../../services/game.service';
 import { getComparator, stableSort } from '../../components/utilities';
 import EditCreateUserFolderEdit from './createFolder';
 import EditNameDialog from './editNameDialog';
 import DeleteConfirmDialog from '../../../../common/DeleteConfirmDialog';
+import EditShareDialog from './shareDialog';
 
 let child_ids = [];
 
@@ -54,7 +57,6 @@ export function getTreeViewData(res) {
     child_ids = [];
 
     for (let i = 0; i < resCopy.length; i += 1) {
-
         const child = getChilds(resCopy, resCopy[i].id);
         let tree = { id: String(resCopy[i].id), name: resCopy[i].name, order_num: resCopy[i].order_number, type: resCopy[i].type, parent_id: resCopy[i].parent_id };
 
@@ -73,7 +75,6 @@ export function getTreeViewData(res) {
         child_ids = [...child_ids, tree.id];
         resCopy = resCopy.filter((data) => child_ids.includes(String(data.id)) === false);
         i = -1;
-
     }
 
     return stableSort(trees, getComparator('asc', 'order_num'));
@@ -89,6 +90,12 @@ const EditFolderTreeView = ({ setEdit, isMain, entireHeight, treeHeight }) => {
     const [updateEdit, setUpdateEdit] = useState({});
     const [editOpen, setEditOpen] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
+    const [shareOpen, setShareOpen] = useState(false);
+    const [alertOpen, setAlertOpen] = useState(false);
+
+    const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+    const menuPopoverOpen = Boolean(menuAnchorEl);
+    const menuPopoverId = menuPopoverOpen ? 'simple-popover' : undefined;
 
     const handleSetCurEdit = (edit) => {
         setCurEdit(edit);
@@ -127,6 +134,27 @@ const EditFolderTreeView = ({ setEdit, isMain, entireHeight, treeHeight }) => {
         handleSetCurEdit(null);
     };
 
+    const handleShareEdit = (e) => {
+        setMenuAnchorEl(e.currentTarget);
+    };
+
+    const handleShareEditByMessage = () => {
+        setMenuAnchorEl(null);
+        GameService.getShareURL(curEdit.id).then((res) => {
+            navigator.clipboard.writeText(res);
+            setAlertOpen(true);
+        });
+    };
+
+    const handleCreateEmbedCode = () => {
+        GameService.getShareURL(curEdit.id).then((res) => {
+            const message = `<iframe src="${res}" width="720" height="400" frameborder="0" allow="autoplay" allowfullscreen></iframe>`;
+
+            navigator.clipboard.writeText(message);
+            setAlertOpen(true);
+        });
+    };
+
     const renderTree = (nodes) => (
         <TreeItem
             key={`${nodes.id}_${nodes.type}`}
@@ -145,10 +173,10 @@ const EditFolderTreeView = ({ setEdit, isMain, entireHeight, treeHeight }) => {
                             </Box>
                             {nodes.type === 'edit' && (
                                 <>
-                                    <Box>
+                                    <Box onClick={handleShareEdit}>
                                         <ShareIcon fontSize="small" />
                                     </Box>
-                                    <Box>
+                                    <Box onClick={() => handleCreateEmbedCode()}>
                                         <DesktopWindowsIcon fontSize="small" />
                                     </Box>
                                 </>
@@ -173,10 +201,13 @@ const EditFolderTreeView = ({ setEdit, isMain, entireHeight, treeHeight }) => {
             const ascArray = stableSort(res, getComparator('asc', 'id'));
             const array = getTreeViewData(ascArray);
 
+            console.log('edit tree => ', ascArray);
             setFolders(array);
             setLoading(false);
         });
     }, []);
+
+    console.log('edit tree => ', curEdit);
 
     return (
         <>
@@ -187,10 +218,15 @@ const EditFolderTreeView = ({ setEdit, isMain, entireHeight, treeHeight }) => {
                     </div>
                 ) : (
                     <>
+                        <Snackbar open={alertOpen} anchorOrigin={{ vertical: 'top', horizontal: 'center' }} autoHideDuration={2000} onClose={() => setAlertOpen(false)}>
+                            <Alert onClose={() => setAlertOpen(false)} severity="success" sx={{ width: '100%' }}>
+                                Successfully copied URL
+                            </Alert>
+                        </Snackbar>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '0 10px 24px' }}>
                             <Button
                                 variant="contained"
-                                sx={{ fontSize: '0.75rem !important', background: '#C5EAC6', color:'#0A7304', '&:hover': { background: '#0A7304' ,color:'#fff'} }}
+                                sx={{ fontSize: '0.75rem !important', background: '#C5EAC6', color: '#0A7304', '&:hover': { background: '#0A7304', color: '#fff' } }}
                                 onClick={() => {
                                     setCreateFolderEdit(true);
                                     setFolderDialog(true);
@@ -201,7 +237,7 @@ const EditFolderTreeView = ({ setEdit, isMain, entireHeight, treeHeight }) => {
                             <Button
                                 variant="contained"
                                 disabled={curEdit === null || curEdit.type === 'edit'}
-                                sx={{fontSize: '0.75rem !important',  background: '#C5EAC6', color:'#0A7304', '&:hover': { background: '#0A7304' ,color:'#fff'} }}
+                                sx={{ fontSize: '0.75rem !important', background: '#C5EAC6', color: '#0A7304', '&:hover': { background: '#0A7304', color: '#fff' } }}
                                 onClick={() => {
                                     setCreateFolderEdit(false);
                                     setFolderDialog(true);
@@ -233,6 +269,32 @@ const EditFolderTreeView = ({ setEdit, isMain, entireHeight, treeHeight }) => {
                     if (flag) handleDeleteEditFolder(curEdit);
                 }}
             />
+            <EditShareDialog open={shareOpen} onClose={() => setShareOpen(false)} edit={curEdit} />
+            <Popover
+                id={menuPopoverId}
+                open={menuPopoverOpen}
+                anchorEl={menuAnchorEl}
+                onClose={() => setMenuAnchorEl(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                sx={{ '& .MuiPopover-paper': { width: '200px', borderRadius: '12px', border: '1px solid #E8E8E8' } }}
+            >
+                <Box
+                    sx={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 20px', cursor: 'pointer' }}
+                    onClick={() => {
+                        setMenuAnchorEl(null);
+                        setShareOpen(true);
+                    }}
+                >
+                    <EmailIcon />
+                    <p className="normal-text">By email</p>
+                </Box>
+                <Divider sx={{ width: '100%' }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 20px', cursor: 'pointer' }} onClick={() => handleShareEditByMessage()}>
+                    <ChatBubbleIcon />
+                    <p className="normal-text">By message</p>
+                </Box>
+            </Popover>
         </>
     );
 };

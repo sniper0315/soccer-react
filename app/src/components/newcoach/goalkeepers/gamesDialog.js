@@ -7,8 +7,6 @@ import GameService from '../../../services/game.service';
 import { ActionData } from '../components/common';
 import { getPeriod } from '../games/tabs/overview/tagListItem';
 import TeamGamesVideoPlayer from '../teams/tabs/games/videoDialog';
-
-import '../coach_style.css';
 import GameExportToEdits from '../games/tabs/overview/exportEdits';
 
 const properties = [
@@ -60,6 +58,8 @@ const GoalkeepersGamesDialog = ({ open, onClose, list, playerName, teamId }) => 
                     ActionData[prop.action].action_result_id,
                     null,
                     null,
+                    null,
+                    null,
                     null
                 ).then((res) => {
                     setPlayData(
@@ -98,6 +98,8 @@ const GoalkeepersGamesDialog = ({ open, onClose, list, playerName, teamId }) => 
                     ActionData[prop.action].action_id,
                     ActionData[prop.action].action_type_id,
                     ActionData[prop.action].action_result_id,
+                    null,
+                    null,
                     null,
                     null,
                     null
@@ -150,6 +152,8 @@ const GoalkeepersGamesDialog = ({ open, onClose, list, playerName, teamId }) => 
                     ActionData[prop.action].action_result_id,
                     null,
                     null,
+                    null,
+                    null,
                     null
                 ).then((res) => {
                     setPlayData(res);
@@ -165,6 +169,8 @@ const GoalkeepersGamesDialog = ({ open, onClose, list, playerName, teamId }) => 
                     ActionData[prop.action].action_id,
                     ActionData[prop.action].action_type_id,
                     ActionData[prop.action].action_result_id,
+                    null,
+                    null,
                     null,
                     null,
                     null

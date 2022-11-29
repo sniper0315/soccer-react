@@ -9,12 +9,6 @@ module.exports = (app) => {
     next();
   });
 
-  app.post(
-    "/player",
-    [authJwt.verifyToken, authJwt.isAdmin],
-    controller.create
-  );
-
   app.get("/player", controller.findAll);
 
   app.post("/player/highlight", controller.addHighlight);
@@ -33,9 +27,18 @@ module.exports = (app) => {
   );
 
   app.get(
-    "/player/getplayersstats/:seasonId/:leagueId/:gameId/:teamId/:playerId",
-    [authJwt.verifyToken, authJwt.isAdminOrCoach],
-    controller.getPlayersStats
+    "/player/game_player_tags/:userId/:teamId/:playerId/:gameId/:actionId/:actionTypeId/:actionResultId/:gameTime/:courtArea/:inside/:gameResult/:homeAway",
+    controller.getGamePlayerTags
+  );
+
+  app.get(
+    "/player/opponent_tags/:userId/:teamId/:playerId/:gameId/:actionId/:actionTypeId/:actionResultId/:gameTime/:courtArea/:inside/:gameResult/:homeAway",
+    controller.getOpponentTags
+  );
+
+  app.get(
+    "/player/player_detection/:gameId/:videoTime/:minBefore/:minAfter",
+    controller.getPlayersDetection
   );
 
   app.post(
@@ -45,14 +48,7 @@ module.exports = (app) => {
 
   app.post(
     "/player/getplayersstats/summary",
-    [authJwt.verifyToken, authJwt.isAdminOrCoach],
     controller.getPlayersStatsAdvanceSummary
-  );
-
-  app.post(
-    "/player/getplayersstats/game",
-    [authJwt.verifyToken, authJwt.isAdminOrCoach],
-    controller.getPlayersStatsGamebyGame
   );
 
   app.post(
@@ -62,29 +58,31 @@ module.exports = (app) => {
 
   app.post(
     "/player/getgoalkeepersstats/summary",
-    [authJwt.verifyToken, authJwt.isAdminOrCoach],
     controller.getGoalkeepersStatsAdvanceSummary
+  );
+
+  app.get(
+    "/player/getplayersstats/:seasonId/:leagueId/:gameId/:teamId/:playerId",
+    [authJwt.verifyToken, authJwt.isAdminOrCoach],
+    controller.getPlayersStats
+  );
+
+  app.post(
+    "/player",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.create
+  );
+
+  app.post(
+    "/player/getplayersstats/game",
+    [authJwt.verifyToken, authJwt.isAdminOrCoach],
+    controller.getPlayersStatsGamebyGame
   );
 
   app.post(
     "/player/getgoalkeepersstats/game",
     [authJwt.verifyToken, authJwt.isAdminOrCoach],
     controller.getGoalkeepersStatsGamebyGame
-  );
-
-  app.get(
-    "/player/game_player_tags/:userId/:teamId/:playerId/:gameId/:actionId/:actionTypeId/:actionResultId/:gameTime/:courtArea/:inside",
-    controller.getGamePlayerTags
-  );
-
-  app.get(
-    "/player/opponent_tags/:userId/:teamId/:playerId/:gameId/:actionId/:actionTypeId/:actionResultId/:gameTime/:courtArea/:inside",
-    controller.getOpponentTags
-  );
-
-  app.get(
-    "/player/player_detection/:gameId/:videoTime/:minBefore/:minAfter",
-    controller.getPlayersDetection
   );
 
   app.get(

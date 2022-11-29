@@ -163,11 +163,11 @@ export default function EditVideoPlayer({ idx, tagList, onChangeClip, drawOpen }
     );
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
-            <div style={{ width: '100%', margin: 'auto', minWidth: 500, position: 'relative' }}>
+        <div className="edit_video_player_container">
+            <div className="video_player_sub_container">
                 <FullScreen handle={handle} onChange={fullscreenChange}>
-                    <div style={{ width: drawOpen ? '100%' : '80%', margin: 'auto' }}>
-                        <div className="player-wrapper">
+                    <div className="video_player_section" onContextMenu={(e) => e.preventDefault()}>
+                        <div className="player-wrapper" onContextMenu={(e) => e.preventDefault()}>
                             {videoURL !== '' && (
                                 <ReactPlayer
                                     className="react-player"
@@ -245,7 +245,7 @@ export default function EditVideoPlayer({ idx, tagList, onChangeClip, drawOpen }
                                 {handle.active ? <FullscreenExitOutlinedIcon /> : <FullscreenIcon />}
                             </IconButton>
                         </div>
-                        {fullMode && (
+                        {tagList.length > 0 && handle.active && (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px 12px', background: '#80808069' }}>
                                 <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '16px', fontWeight: 500, color: 'white' }}>{tagList[curIdx].clip_name}</Typography>
                             </div>
