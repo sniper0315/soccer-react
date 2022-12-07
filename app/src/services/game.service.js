@@ -714,6 +714,26 @@ const deleteAcademyFromRepresentative = (userId, academyId) => {
     });
 };
 
+const addTeamToAcademy = (userId, academyId, seasonId, teamId) => {
+    return axios.put(API_URL + `user/academy_team/add/${userId}/${academyId}/${seasonId}/${teamId}`, { userId, academyId, seasonId, teamId }, { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const getTeamsByAcademy = (userId, academyId, seasonId) => {
+    return axios.get(API_URL + `user/academy_team/get/${userId}/${academyId}/${seasonId}`, { headers: authHeader(), data: { userId, academyId, seasonId } }).then((response) => {
+        return response.data;
+    });
+};
+
+const deleteTeamsFromAcademy = (userId, academyId, seasonId, teamId) => {
+    return axios
+        .delete(API_URL + `user/academy_team/delete/${userId}/${academyId}/${seasonId}/${teamId}`, { headers: authHeader(), data: { userId, academyId, seasonId, teamId } })
+        .then((response) => {
+            return response.data;
+        });
+};
+
 const getAllAcademies = (userId) => {
     return axios.get(API_URL + `user/academy/get/all`, { headers: authHeader() }).then((response) => {
         return response.data;
@@ -722,6 +742,12 @@ const getAllAcademies = (userId) => {
 
 const getAllPositions = () => {
     return axios.get(API_URL + 'player/position', { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const getPlayersByTeam = (teamId, seasonId) => {
+    return axios.get(API_URL + `player/team/${teamId}/${seasonId}`, { headers: authHeader(), data: { teamId, seasonId } }).then((response) => {
         return response.data;
     });
 };
@@ -1091,6 +1117,7 @@ const gameService = {
     addRepresentative,
     addAcademy,
     addAcademyToRepresentative,
+    addTeamToAcademy,
 
     addUserEdits,
     createUserFolder,
@@ -1119,6 +1146,7 @@ const gameService = {
     getAllActionTypes,
     getAllActionResults,
     getAllPositions,
+    getPlayersByTeam,
     getAllGamesByPlayer,
     getAllPlayerTagsByPlayer,
     getAllPlayerTagsByTeam,
@@ -1128,6 +1156,7 @@ const gameService = {
     getAllUsers,
     getAllRepresentatives,
     getAcademiesForRepresentative,
+    getTeamsByAcademy,
     getAllAcademies,
     getAllCoachTeam,
     getAllGamesByCoach,
@@ -1267,7 +1296,8 @@ const gameService = {
     moveFolderNewPosition,
     deleteRepresentative,
     deleteAcademy,
-    deleteAcademyFromRepresentative
+    deleteAcademyFromRepresentative,
+    deleteTeamsFromAcademy
 };
 
 export default gameService;
