@@ -32,7 +32,7 @@ const SettingsAcademyControl = ({ userId, select }) => {
                             <div
                                 key={index}
                                 className="academy_item"
-                                style={{ background: selectedIndex === index ? '#b4b4b4' : 'white' }}
+                                style={{ background: selectedIndex === index ? '#C5EAC6' : 'white' }}
                                 onClick={() => {
                                     setSelectedIndex(index);
                                     select(item);

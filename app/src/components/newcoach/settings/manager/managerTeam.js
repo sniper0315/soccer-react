@@ -8,36 +8,34 @@ import GameService from '../../../../services/game.service';
 import { getComparator, stableSort } from '../../components/utilities';
 import { MenuProps } from '../../components/common';
 
-const SettingsAcademyTeamControl = ({ userId, academy, select, season }) => {
+const SettingsManagerTeamControl = ({ select, season }) => {
     const [academyTeamList, setAcademyTeamList] = useState([]);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [seasonList, setSeasonList] = useState([]);
     const [seasonFilter, setSeasonFilter] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        GameService.getAllSeasons().then((res) => {
+    useEffect(async () => {
+        setLoading(true);
+        await GameService.getAllSeasons().then((res) => {
             const desArray = stableSort(res, getComparator('desc', 'id'));
 
             setSeasonList(desArray);
             setSeasonFilter(desArray[0]);
             season(desArray[0]);
         });
+        await GameService.getAllTeamsByCoach().then((res) => {
+            setAcademyTeamList(res);
+            setLoading(false);
+        });
     }, []);
 
     useEffect(() => {
         select(null);
-        setAcademyTeamList([]);
         setSelectedIndex(-1);
+    }, [seasonFilter]);
 
-        if (academy && seasonFilter) {
-            setLoading(true);
-            GameService.getTeamsByAcademy(userId, academy.academy_id, seasonFilter.id).then((res) => {
-                setAcademyTeamList(res);
-                setLoading(false);
-            });
-        }
-    }, [userId, academy, seasonFilter]);
+    console.log('manager team', academyTeamList);
 
     return (
         <div className="settings_academy_container">
@@ -81,7 +79,7 @@ const SettingsAcademyTeamControl = ({ userId, academy, select, season }) => {
                                 }}
                             >
                                 <FolderSharedIcon />
-                                <p className="normal-text">{item.name}</p>
+                                <p className="normal-text">{item.team_name}</p>
                             </div>
                         ))}
                     </div>
@@ -91,4 +89,4 @@ const SettingsAcademyTeamControl = ({ userId, academy, select, season }) => {
     );
 };
 
-export default SettingsAcademyTeamControl;
+export default SettingsManagerTeamControl;

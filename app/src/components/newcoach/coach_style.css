@@ -264,7 +264,7 @@
 }
 
 .tab-page.settings_representative {
-    gap: 48px;
+    gap: 20px;
     justify-content: center;
 }
 
@@ -282,7 +282,7 @@
 
 .settings_academy_container .academy_section {
     padding: 16px 12px;
-    border: 1px solid #1a1b1d;
+    border: 1px solid #0a7304;
     border-radius: 8px;
     width: 240px;
     height: 60vh;
@@ -292,7 +292,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: 60vh;
+    max-height: 55vh;
     overflow-y: auto;
 }
 
@@ -302,7 +302,7 @@
     gap: 16px;
     padding: 4px 8px;
     border-radius: 8px;
-    border: 1px solid #1a1b1d;
+    border: 1px solid #0a7304;
     cursor: pointer;
 }
 
@@ -318,7 +318,7 @@
     height: 60vh;
     border-radius: 8px;
     padding: 16px 12px;
-    border: 1px solid #1a1b1d;
+    border: 1px solid #0a7304;
 }
 
 .settings_academy_container .academy_team_section .team_season_container {
@@ -340,7 +340,7 @@
     gap: 16px;
     padding: 4px 8px;
     border-radius: 8px;
-    border: 1px solid #1a1b1d;
+    border: 1px solid #0a7304;
     cursor: pointer;
 }
 
@@ -350,9 +350,8 @@
 
 .settings_academy_container .team_game_section {
     padding: 16px 12px;
-    border: 1px solid #1a1b1d;
+    border: 1px solid #0a7304;
     border-radius: 8px;
-    width: 880px;
     height: 60vh;
 }
 
@@ -361,11 +360,13 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    cursor: pointer;
+    border-radius: 12px;
 }
 
 .settings_academy_container .team_game_section .academy_items_container .team_game_item p:first-child {
     font-size: 0.7rem;
-    width: 88px;
+    width: 72px;
 }
 
 .settings_academy_container .team_game_section .academy_items_container .team_game_item .game_section {
@@ -376,7 +377,7 @@
 .settings_academy_container .team_game_section .academy_items_container .team_game_item .game_section img:first-child {
     width: 40px;
     height: 40px;
-    margin: 4px 8px;
+    margin: 4px 0;
 }
 
 .settings_academy_container .team_game_section .academy_items_container .team_game_item .game_section p:nth-child(2) {
@@ -385,7 +386,7 @@
 }
 
 .settings_academy_container .team_game_section .academy_items_container .team_game_item .game_section p:nth-child(3) {
-    width: 210px;
+    width: 180px;
 }
 
 .settings_academy_container .team_game_section .academy_items_container .team_game_item .game_section img:last-child {
