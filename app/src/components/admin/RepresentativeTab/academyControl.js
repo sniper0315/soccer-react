@@ -29,6 +29,9 @@ const AcademyControl = ({ representative, select }) => {
         if (representative === null) return;
 
         setLoading(true);
+        setAcademyList([]);
+        setSelectedIndex(-1);
+        select(null);
         GameService.getAcademiesForRepresentative(representative.user_id).then((res) => {
             setAcademyList(res);
             setLoading(false);
@@ -45,17 +48,17 @@ const AcademyControl = ({ representative, select }) => {
         if (academyName === '' || academyCountry === '') return;
 
         if (editMode === 'Add') {
-            const filtered = academies.filter((item) => item.name === academyName && item.Country === academyCountry);
-
-            if (filtered.length === 0) {
-                GameService.addAcademy(academyName, academyCountry).then((res) => {
-                    setAlertOpen(true);
-                });
-            }
+            GameService.addAcademy(academyName, academyCountry).then((res) => {
+                setAlertOpen(true);
+            });
         } else {
             GameService.editAcademy(editAcademyId, academyName, academyCountry).then((res) => {
-                setRefreshDialog(!refreshDialog);
-                setAddOpen(false);
+                setAcademies([]);
+                GameService.getAllAcademies().then((res) => {
+                    setAcademies(res);
+                    setAddOpen(false);
+                    setRefreshDialog(!refreshDialog);
+                });
             });
         }
     };
@@ -80,15 +83,21 @@ const AcademyControl = ({ representative, select }) => {
 
     const handleDeleteAcademy = (item) => {
         GameService.deleteAcademy(item.id).then((res) => {
-            setRefreshDialog(!refreshDialog);
+            setAcademies([]);
+            GameService.getAllAcademies().then((res) => {
+                setAcademies(res);
+                setRefreshDialog(!refreshDialog);
+            });
         });
     };
 
-    useEffect(() => {
+    const handleOpenAcademiesDialog = () => {
+        setAcademies([]);
         GameService.getAllAcademies().then((res) => {
             setAcademies(res);
+            setDialogOpen(true);
         });
-    }, [refreshDialog]);
+    };
 
     useEffect(() => {
         loadAllAcademiesByRepresentative();
@@ -106,12 +115,7 @@ const AcademyControl = ({ representative, select }) => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', border: '1px solid #E8E8E8', borderRadius: '8px', width: '240px', height: '70vh', padding: '16px 12px' }}>
                 <div style={{ width: '100%', textAlign: 'right' }}>
-                    <Button
-                        variant="outlined"
-                        onClick={() => {
-                            if (representative) setDialogOpen(true);
-                        }}
-                    >
+                    <Button variant="outlined" disabled={representative === null} onClick={() => handleOpenAcademiesDialog()}>
                         ADD
                     </Button>
                 </div>
