@@ -264,7 +264,7 @@
 }
 
 .tab-page.settings_representative {
-    gap: 20px;
+    gap: 10px;
     justify-content: center;
 }
 
@@ -314,7 +314,7 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
-    width: 300px;
+    width: 260px;
     height: 60vh;
     border-radius: 8px;
     padding: 16px 12px;
@@ -352,6 +352,7 @@
     padding: 16px 12px;
     border: 1px solid #0a7304;
     border-radius: 8px;
+    width: 720px;
     height: 60vh;
 }
 
@@ -375,13 +376,13 @@
 }
 
 .settings_academy_container .team_game_section .academy_items_container .team_game_item .game_section img:first-child {
-    width: 40px;
-    height: 40px;
-    margin: 4px 0;
+    width: 30px;
+    height: 30px;
+    margin: 4px 4px;
 }
 
 .settings_academy_container .team_game_section .academy_items_container .team_game_item .game_section p:nth-child(2) {
-    width: 30px;
+    width: 20px;
     text-align: center;
 }
 
@@ -390,7 +391,7 @@
 }
 
 .settings_academy_container .team_game_section .academy_items_container .team_game_item .game_section img:last-child {
-    width: 32px;
+    width: 18px;
 }
 
 .horizontal-4 {

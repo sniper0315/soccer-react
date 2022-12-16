@@ -28,7 +28,7 @@ import { logout } from './actions/auth';
 import { clearMessage } from './actions/message';
 
 import { history } from './helpers/history';
-
+import { useTranslation } from 'react-i18next';
 import AuthVerify from './common/AuthVerify';
 import EventBus from './common/EventBus';
 import { getUser, parseJwt } from './common/utilities';
@@ -85,6 +85,7 @@ const ThemeContext = React.createContext({ theme: {} });
 export const useMyTheme = () => React.useContext(ThemeContext);
 
 const App = () => {
+    const { t } = useTranslation();
     const { user: currentUser } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
 
@@ -173,7 +174,7 @@ const App = () => {
                                         path="/new_coach/settings"
                                         element={
                                             <NewCoach>
-                                                <Settings />
+                                                <Settings t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -181,7 +182,7 @@ const App = () => {
                                         path="/new_coach/teams"
                                         element={
                                             <NewCoach>
-                                                <Teams />
+                                                <Teams t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -189,7 +190,7 @@ const App = () => {
                                         path="/new_coach/teams/:teamId"
                                         element={
                                             <NewCoach>
-                                                <TeamPage />
+                                                <TeamPage t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -197,7 +198,7 @@ const App = () => {
                                         path="/new_coach/games"
                                         element={
                                             <NewCoach>
-                                                <Games />
+                                                <Games t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -205,7 +206,7 @@ const App = () => {
                                         path="/new_coach/games/:gameId"
                                         element={
                                             <NewCoach>
-                                                <GamePage />
+                                                <GamePage t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -213,7 +214,7 @@ const App = () => {
                                         path="/new_coach/edits"
                                         element={
                                             <NewCoach>
-                                                <Edits />
+                                                <Edits t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -221,7 +222,7 @@ const App = () => {
                                         path="/new_coach/players"
                                         element={
                                             <NewCoach>
-                                                <Players />
+                                                <Players t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -229,7 +230,7 @@ const App = () => {
                                         path="/new_coach/opponents"
                                         element={
                                             <NewCoach>
-                                                <Opponents />
+                                                <Opponents t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -237,7 +238,7 @@ const App = () => {
                                         path="/new_coach/opponents/:gameId"
                                         element={
                                             <NewCoach>
-                                                <OpponentPage />
+                                                <OpponentPage t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -245,7 +246,7 @@ const App = () => {
                                         path="/new_coach/leaders"
                                         element={
                                             <NewCoach>
-                                                <Leaders />
+                                                <Leaders t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -253,7 +254,7 @@ const App = () => {
                                         path="/new_coach/video_cutter"
                                         element={
                                             <NewCoach>
-                                                <VideoCutter />
+                                                <VideoCutter t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -261,7 +262,7 @@ const App = () => {
                                         path="/new_coach/corrections"
                                         element={
                                             <NewCoach>
-                                                <Corrections />
+                                                <Corrections t={t} />
                                             </NewCoach>
                                         }
                                     />
@@ -269,7 +270,7 @@ const App = () => {
                                         path="/new_coach/goalkeepers"
                                         element={
                                             <NewCoach>
-                                                <Goalkeepers />
+                                                <Goalkeepers t={t} />
                                             </NewCoach>
                                         }
                                     />

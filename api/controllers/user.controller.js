@@ -264,3 +264,72 @@ exports.deleteTeamsFromAcademy = (req, res) => {
       });
     });
 };
+
+exports.addAcademyCoach = (req, res) => {
+  Sequelize.query(
+    `
+      select * from public.fnc_add_academy_coach(${req.params.userId}, ${req.params.academyId})
+    `
+  )
+    .then((data) => {
+      res.send("Successfully added");
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.deleteAcademyCoach = (req, res) => {
+  Sequelize.query(
+    `
+      select * from public.fnc_delete_academy_coach(${req.params.userId}, ${req.params.academyId})
+    `
+  )
+    .then((data) => {
+      res.send("Successfully deleted");
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.getAcademyCoach = (req, res) => {
+  Sequelize.query(
+    `
+      select * from public.fnc_get_academy_coach(${req.params.userId})
+    `
+  )
+    .then((data) => {
+      res.send(data[0]);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.getAllAcademyCoaches = (req, res) => {
+  Sequelize.query(
+    `select
+      public."Users".*,
+      public."Roles".name as role_name
+    from public."User_Roles"
+    join public."Users" on public."Users".id = public."User_Roles"."userId"
+    join public."Roles" on public."Roles".id = public."User_Roles"."roleId"
+    where public."User_Roles"."roleId" = 3
+    `
+  )
+    .then((data) => {
+      res.send(data[0]);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};

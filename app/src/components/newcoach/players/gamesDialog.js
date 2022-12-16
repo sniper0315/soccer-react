@@ -29,7 +29,7 @@ const properties = [
     { id: 'total_clearance', title: 'Clearance', action: 'Clearance' }
 ];
 
-const PlayersGamesDialog = ({ open, onClose, list, playerName }) => {
+const PlayersGamesDialog = ({ open, onClose, list, playerName, t }) => {
     const { user: currentUser } = useSelector((state) => state.auth);
 
     const [playData, setPlayData] = useState([]);
@@ -124,11 +124,11 @@ const PlayersGamesDialog = ({ open, onClose, list, playerName }) => {
                         <TableHead>
                             <TableRow height="36px">
                                 <TableCell key="0" align="center">
-                                    Game
+                                    {t('Game')}
                                 </TableCell>
                                 {properties.map((item, index) => (
                                     <TableCell key={index + 1} align="center">
-                                        {item.title}
+                                        {t(item.title)}
                                     </TableCell>
                                 ))}
                             </TableRow>
@@ -158,7 +158,7 @@ const PlayersGamesDialog = ({ open, onClose, list, playerName }) => {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <TeamGamesVideoPlayer open={videoOpen} onClose={() => setVideoOpen(false)} video_url={videoURL} tagList={playData} />
+                <TeamGamesVideoPlayer t={t} open={videoOpen} onClose={() => setVideoOpen(false)} video_url={videoURL} tagList={playData} />
                 <GameExportToEdits open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
             </DialogContent>
         </Dialog>

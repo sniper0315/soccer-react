@@ -4,7 +4,7 @@ import { Box, Popover, Divider } from '@mui/material';
 import ExportIcon from '../../../../../assets/Export.svg';
 import VideoIcon from '@mui/icons-material/SlideshowOutlined';
 
-const GameTagMenu = ({ anchor, onClose, onView, onHudl, onRender, onEdits }) => {
+const GameTagMenu = ({ anchor, onClose, onView, onHudl, onRender, onEdits, t }) => {
     const menuPopoverOpen = Boolean(anchor);
     const menuPopoverId = menuPopoverOpen ? 'simple-popover' : undefined;
 
@@ -20,22 +20,22 @@ const GameTagMenu = ({ anchor, onClose, onView, onHudl, onRender, onEdits }) => 
         >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', cursor: 'pointer' }} onClick={onView}>
                 <VideoIcon />
-                <p className="menu-item">View Clips</p>
+                <p className="menu-item">{t('View Clips')}</p>
             </Box>
             <Divider sx={{ width: '100%' }} />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', cursor: 'pointer' }} onClick={onHudl}>
                 <img src={ExportIcon} />
-                <p className="menu-item">Export to Sportcode</p>
+                <p className="menu-item">{t('Export to Sportcode')}</p>
             </Box>
             <Divider sx={{ width: '100%' }} />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', cursor: 'pointer' }} onClick={onRender}>
                 <img src={ExportIcon} />
-                <p className="menu-item">Export to Render</p>
+                <p className="menu-item">{t('Export to Render')}</p>
             </Box>
             <Divider sx={{ width: '100%' }} />
             <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', cursor: 'pointer' }} onClick={onEdits}>
                 <img src={ExportIcon} />
-                <p className="menu-item">Export to "My Edits"</p>
+                <p className="menu-item">{t('Export to My Edits')}</p>
             </Box>
         </Popover>
     );

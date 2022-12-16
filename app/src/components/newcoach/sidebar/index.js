@@ -12,7 +12,10 @@ import '../coach_style.css';
 import LogoAlone from '../../../assets/logoAlone.png';
 import MenuIcon from '@mui/icons-material/MenuOutlined';
 
-const Sidebar = () => {
+import i18next from 'i18next';
+import cookie from 'react-cookies';
+
+const Sidebar = ({ t }) => {
     const [minimum, setMinimum] = useState(false);
     const [hoverIndex, setHoverIndex] = useState(undefined);
     const [selectIndex, setSelectIndex] = useState(0);
@@ -22,6 +25,8 @@ const Sidebar = () => {
     const [menuState, setMenuState] = useState({
         corrections: false
     });
+    const savedLanguage = cookie.load('lang') ? cookie.load('lang') : 'en';
+    const [language, setLanguage] = useState(savedLanguage);
 
     const dispatch = useDispatch();
     const currentGame = useSelector((state) => state.game);
@@ -38,6 +43,16 @@ const Sidebar = () => {
     const handleMouseLeave = () => {
         setHoverIndex(undefined);
     };
+
+    useEffect(() => {
+        cookie.save('lang', language, { path: '/' });
+        i18next.changeLanguage(language);
+        if (language == 'iw' || language == 'ar') {
+            document.body.style.direction = 'rtl';
+        } else {
+            document.body.style.direction = 'ltr';
+        }
+    }, [language]);
 
     useEffect(async () => {
         setPathname(window.location.pathname);
@@ -87,7 +102,7 @@ const Sidebar = () => {
                             <MenuItem
                                 path={menuItem.path}
                                 icon={menuItem.icon}
-                                title={menuItem.title}
+                                title={t(menuItem.title)}
                                 isMinimized={minimum}
                                 isHover={idx === hoverIndex ? true : false}
                                 isSelected={idx === selectIndex ? true : false}
@@ -105,7 +120,9 @@ const Sidebar = () => {
                 </div>
             ) : (
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '5vh', marginBottom: '8px' }}>
-                    <p className="sidebar-game-count">{gameCount} Games Ordered</p>
+                    <p className="sidebar-game-count">
+                        {gameCount} {t('Games Ordered')}
+                    </p>
                 </Box>
             )}
         </Box>

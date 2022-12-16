@@ -6,7 +6,7 @@ import GameExportToEdits from '../overview/exportEdits';
 import { getPeriod } from '../overview/tagListItem';
 import GameStatsVideoPlayer from './videoDialog';
 
-const GameStatsChart = ({ chartId, title, isType, action_results, list, filterText, game, teamId, refreshPage, isEdit }) => {
+const GameStatsChart = ({ chartId, title, isType, action_results, list, filterText, game, teamId, refreshPage, isEdit, t }) => {
     const [playerList, setPlayerList] = useState([]);
     const [hoverId, setHoverId] = useState('');
     const [videoOpen, setVideoOpen] = useState(false);
@@ -120,7 +120,7 @@ const GameStatsChart = ({ chartId, title, isType, action_results, list, filterTe
                     {action_results.map((item, index) => (
                         <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                             <div style={{ background: `${item.color}`, borderRadius: '50%', width: '12px', height: '12px' }} />
-                            <p className="normal-text-italic">{item.title}</p>
+                            <p className="normal-text-italic">{t(item.title)}</p>
                         </div>
                     ))}
                 </div>
@@ -162,6 +162,7 @@ const GameStatsChart = ({ chartId, title, isType, action_results, list, filterTe
                 ))}
             </div>
             <GameStatsVideoPlayer
+                t={t}
                 open={videoOpen}
                 onClose={(flag) => {
                     setVideoOpen(false);

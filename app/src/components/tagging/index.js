@@ -39,6 +39,7 @@ import { compose } from '@mui/system';
 import Others from './contents/Others';
 import GK from './contents/GK';
 import { getPeriod } from '../newcoach/games/tabs/overview/tagListItem';
+import useVideoPlayer from './useVideoPlayer';
 const drawerWidth = '30%';
 
 const PLAYBACK_RATE = [
@@ -116,7 +117,6 @@ export default function Tagging() {
 
         await GameService.getGame(game_id)
             .then((res) => {
-
                 if (!((!res.done_tagging && currentUser.roles.includes('ROLE_TAGGER')) || currentUser.roles.includes('ROLE_ADMIN'))) {
                     navigate('/');
                     window.alert('Game has been already tagged');
@@ -128,8 +128,9 @@ export default function Tagging() {
     }, [game_id]);
 
     const player = React.useRef(null);
+    const overlayElRef = React.useRef(null);
 
-    const seekTo = (sec) => player.current.seekTo(player.current.getCurrentTime() + sec);
+    const seekTo = (sec) => (player.current.currentTime = player.current.currentTime + sec);
 
     const [open, setOpen] = React.useState(true);
     const [modalOpen, setModalOpen] = React.useState(false);
@@ -146,9 +147,11 @@ export default function Tagging() {
     const [curTeamTag, setCurTeamTag] = React.useState(null);
     const [curTagStatusText, setCurTagStatusText] = React.useState('');
     const [defenseTeamGoalKeeper, setDefenseTeamGoalKeeper] = React.useState([]);
-    const [teamTagId, setTeamTagId] = React.useState(null)
-    const [startTime, setStartTime] = React.useState(null)
-    const [teamTagClicked, setTeamTagClicked] = React.useState(true)
+    const [teamTagId, setTeamTagId] = React.useState(null);
+    const [startTime, setStartTime] = React.useState(null);
+    const [teamTagClicked, setTeamTagClicked] = React.useState(true);
+    const [overlayWidth, setOverlayWidth] = React.useState(0);
+    const [overlayHeight, setOverlayHeight] = React.useState(0);
 
     const [state, setState] = React.useReducer((old, action) => ({ ...old, ...action }), {
         url: '',
@@ -275,7 +278,7 @@ export default function Tagging() {
             .then((res) => {
                 setPlayerTagList(res);
             })
-            .catch(() => { });
+            .catch(() => {});
     };
 
     const changePlayRate = (flag) => {
@@ -341,11 +344,11 @@ export default function Tagging() {
     const taggingButtonClicked = (action) => {
         setModalOpen(true);
         setModalContent(action);
-        setTeamTagId(null)
-        setTeamTagClicked(true)
+        setTeamTagId(null);
+        setTeamTagClicked(true);
         setPlay(false);
 
-        const curTime = player.current.getCurrentTime();
+        const curTime = player.current.currentTime;
         setTeamTag({ end_time: toHHMMSS(`${curTime + config.sec_after}`) });
         setPlayerTag({
             team_id: offenseTeamId,
@@ -360,36 +363,35 @@ export default function Tagging() {
             const res = await GameService.addTeamTag({
                 ...teamTag,
 
-                end_time: isCP ? toHHMMSS(player.current.getCurrentTime()) : teamTag.end_time
+                end_time: isCP ? toHHMMSS(player.current.currentTime) : teamTag.end_time
             });
             setModalOpen(false);
             setTeamTag({ id: res.id });
             setTagCnt(tagCnt + 1);
             return res;
-        } catch (e) { }
+        } catch (e) {}
     };
 
     const addPlayerTag = async (PTag) => await GameService.addPlayerTag(PTag);
 
-    let playerTagTime = []
+    let playerTagTime = [];
 
     const sendTimeData = (data) => {
-        playerTagTime.push(data)
-        setClicked(true)
-        setTeamTagClicked(true)
-    }
+        playerTagTime.push(data);
+        setClicked(true);
+        setTeamTagClicked(true);
+    };
 
     const setTaggingState = (tags) => {
-
-        let start_time = '00:00:00'
-        let end_time = '00:00:00'
+        let start_time = '00:00:00';
+        let end_time = '00:00:00';
 
         if (playerTagTime.length <= 0) {
-            start_time = playerTag.start_time
-            end_time = playerTag.end_time
+            start_time = playerTag.start_time;
+            end_time = playerTag.end_time;
         } else {
-            start_time = playerTagTime[0].start_time
-            end_time = playerTagTime[0].end_time
+            start_time = playerTagTime[0].start_time;
+            end_time = playerTagTime[0].end_time;
         }
         setTempPlayerTagList([
             ...temp_playerTag_list,
@@ -415,14 +417,19 @@ export default function Tagging() {
         });
     }, [config]);
 
+    React.useEffect(() => {
+        setOverlayWidth(overlayElRef.current.clientWidth);
+        setOverlayHeight(overlayElRef.current.clientHeight);
+    });
+
     const saveTags = async (isCP = false) => {
-        setPlay(false)
-        let tTag = null
+        setPlay(false);
+        let tTag = null;
         if (teamTagId !== null) {
-            tTag = teamTagId
+            tTag = teamTagId;
         } else {
             let temp = await addTeamTag(isCP);
-            tTag = temp.id
+            tTag = temp.id;
         }
         for (const pTag of temp_playerTag_list) {
             await addPlayerTag({ ...pTag, team_tag_id: tTag });
@@ -458,19 +465,20 @@ export default function Tagging() {
     }, [clicked]);
 
     const offensiveTeamClicked = (team) => {
-        const st = toHHMMSS(`${player.current.getCurrentTime() ? player.current.getCurrentTime() : 0}`);
+        const st = toHHMMSS(`${player.current.currentTime ? player.current.currentTime : 0}`);
         setState({ offense: team, start_time: subSecToHHMMSS(st, 5) });
     };
 
     const displayTagInfo = () => {
-        if (curTeamTag === null) return '';
+        if (curTeamTag === null || player === null) return '';
+        console.log('current time =>', player.current.currentTime);
 
         const sameTags = teamTagList.filter((item) => item.period === curTeamTag.period);
 
-        if (player && player.current.getCurrentTime() < toSecond(sameTags[sameTags.length - 1].start_time)) return '';
+        if (player && player.current.currentTime < toSecond(sameTags[sameTags.length - 1].start_time)) return '';
 
         const period = getPeriod(curTeamTag.period);
-        let time = Math.floor(player.current.getCurrentTime()) - toSecond(sameTags[sameTags.length - 1].start_time);
+        let time = Math.floor(player.current.currentTime) - toSecond(sameTags[sameTags.length - 1].start_time);
 
         let minutes = Math.floor(time / 60);
         let seconds = time - minutes * 60;
@@ -498,6 +506,14 @@ export default function Tagging() {
             setDefenseTeamGoalKeeper(defPlayers);
         });
     }, [defenseTeam]);
+
+    const { isPlaying, progress, speed, isMuted, positions, togglePlay, handleOnTimeUpdate, handleVideoProgress, handleVideoSpeed, toggleMute, currentframe } = useVideoPlayer(
+        player,
+        displayTagInfo,
+        game_id
+    );
+
+    console.log('tagging position =>', positions, overlayWidth, overlayHeight);
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -583,7 +599,7 @@ export default function Tagging() {
                     updateTagList={updateTagList}
                     handleRowClick={(row) => {
                         setCurTeamTag(row);
-                        player.current.seekTo(toSecond(row?.start_time));
+                        player.current.currentTime = toSecond(row?.start_time);
                         dispPlayerTags(row?.id);
                     }}
                     selectedId={state.curTeamTagId}
@@ -618,23 +634,8 @@ export default function Tagging() {
                     </Tooltip>
                 </div>
                 <Box>
-                    <div style={{ maxWidth: '92%', margin: 'auto', position: 'relative' }}>
-                        <div className="player-wrapper">
-                            <ReactPlayer
-                                className="react-player"
-                                url={state.url}
-                                /* url={VIDEO} */
-                                ref={player}
-                                onPlay={() => setPlay(true)}
-                                onPause={() => setPlay(false)}
-                                onProgress={(p) => setCurTagStatusText(displayTagInfo())}
-                                playing={play}
-                                playbackRate={PLAYBACK_RATE[playRate].rate}
-                                controls={true}
-                                width="100%"
-                                height="97%"
-                            />
-                        </div>
+                    <div style={{ maxWidth: '86%', margin: 'auto', position: 'relative' }}>
+                        <video className="video-player" src={state.url} ref={player} onTimeUpdate={handleOnTimeUpdate} controls width="100%" height="97%" />
                         {curTagStatusText !== '' && (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', position: 'absolute', top: '10px' }}>
                                 <div style={{ background: 'blue', width: 'fit-content', padding: '4px 8px' }}>
@@ -642,6 +643,55 @@ export default function Tagging() {
                                 </div>
                             </div>
                         )}
+                        <div style={{ display: 'flex', justifyContent: 'space-evenly', position: 'absolute', top: 0, width: '100%', height: '85%', flexWrap: 'wrap' }} ref={overlayElRef}>
+                            {positions.map((item) => {
+                                let x = item.x;
+                                let y = item.y;
+                                let w = item.w;
+                                let h = item.h;
+                                let player_item = item.pui;
+                                let frame_id = item.id;
+
+                                let xpos = (overlayWidth * x) / 1920;
+                                let ypos = (overlayHeight * (y + 100)) / 1080;
+                                let rect_w = (overlayWidth * w) / 1920;
+                                let rect_h = (overlayHeight * h) / 1080;
+
+                                return (
+                                    <div
+                                        key={frame_id}
+                                        style={{
+                                            backgroundColor: 'rgba(0, 255, 128, 0)',
+                                            position: 'absolute',
+                                            left: xpos,
+                                            top: ypos - 16,
+                                            width: rect_w,
+                                            height: rect_h + 16,
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center'
+                                        }}
+                                    >
+                                        <div
+                                            style={{
+                                                backgroundColor: 'rgba(0, 0, 0, 0.55)',
+                                                paddingLeft: 2,
+                                                paddingRight: 2,
+                                                width: 'fitContent',
+                                                height: 16,
+                                                leftMargin: 'auto',
+                                                rightMargin: 'auto',
+                                                fontSize: 12,
+                                                color: 'white'
+                                            }}
+                                        >
+                                            {player_item}
+                                        </div>
+                                        <div style={{ flexGrow: 1, border: '1px solid red', width: '100%' }}></div>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                     {open && (
                         <>

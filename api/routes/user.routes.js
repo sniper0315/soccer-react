@@ -115,4 +115,28 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.deleteTeamsFromAcademy
   );
+
+  app.get(
+    "/user/academy_coach/get/:userId",
+    [authJwt.verifyToken, authJwt.isAdminOrCoach],
+    controller.getAcademyCoach
+  );
+
+  app.get(
+    "/user/academy_coach/all",
+    [authJwt.verifyToken, authJwt.isAdminOrCoach],
+    controller.getAllAcademyCoaches
+  );
+
+  app.put(
+    "/user/academy_coach/add/:userId/:academyId",
+    [authJwt.verifyToken, authJwt.isAdminOrCoach],
+    controller.addAcademyCoach
+  );
+
+  app.delete(
+    "/user/academy_coach/delete/:userId/:academyId",
+    [authJwt.verifyToken, authJwt.isAdminOrCoach],
+    controller.deleteAcademyCoach
+  );
 };

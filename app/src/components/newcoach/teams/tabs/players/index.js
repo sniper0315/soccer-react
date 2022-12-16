@@ -30,7 +30,7 @@ const headCells = [
     { id: 'total_clearance', title: 'Clearance', action: 'Clearance' }
 ];
 
-const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games }) => {
+const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games, t }) => {
     const [playerList, setPlayerList] = useState([]);
     const [playerIds, setPlayerIds] = useState([]);
     const [order, setOrder] = useState('desc');
@@ -232,12 +232,12 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games }) => {
                     <TableHead>
                         <TableRow height="36px">
                             <TableCell key="name" align="center" colSpan={2}>
-                                Name
+                                {t('Name')}
                             </TableCell>
                             {headCells.map((cell) => (
                                 <TableCell key={cell.id} align="center" sortDirection={orderBy === cell.id ? order : false}>
                                     <TableSortLabel active={orderBy === cell.id} direction={orderBy === cell.id ? order : 'asc'} onClick={() => handleRequestSort(cell.id)}>
-                                        {cell.title}
+                                        {t(cell.title)}
                                     </TableSortLabel>
                                 </TableCell>
                             ))}
@@ -283,6 +283,7 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games }) => {
                 </Table>
             </TableContainer>
             <TeamPlayerStatDialog
+                t={t}
                 open={statOpen}
                 onClose={() => setStatOpen(false)}
                 player={currentPlayer}
@@ -293,6 +294,7 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games }) => {
                 initialState={playerStat}
             />
             <TeamStatsVideoPlayer
+                t={t}
                 open={videoOpen}
                 onClose={(flag) => {
                     setVideoOpen(false);
@@ -302,7 +304,7 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games }) => {
                 video_url={gameList}
                 tagList={playData}
             />
-            <GameExportToEdits open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
+            <GameExportToEdits t={t} open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
         </Box>
     );
 };

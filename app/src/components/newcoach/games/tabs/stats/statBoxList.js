@@ -23,7 +23,7 @@ let boxList = [
     ]
 ];
 
-const GameStatsBoxList = ({ game, list, teamId, refreshPage, isEdit }) => {
+const GameStatsBoxList = ({ game, list, teamId, refreshPage, isEdit, t }) => {
     const [actionList, setActionList] = useState([]);
     const [videoOpen, setVideoOpen] = useState(false);
     const [playData, setPlayData] = useState([]);
@@ -113,7 +113,7 @@ const GameStatsBoxList = ({ game, list, teamId, refreshPage, isEdit }) => {
                         onClick={() => handleDisplayVideo(item)}
                         onContextMenu={handleExportTags(item)}
                     >
-                        <p className="normal-text">{item.title}</p>
+                        <p className="normal-text">{t(item.title)}</p>
                         <p className="normal-text">{item.total}</p>
                     </Box>
                 ))}
@@ -138,7 +138,7 @@ const GameStatsBoxList = ({ game, list, teamId, refreshPage, isEdit }) => {
                         onClick={() => handleDisplayVideo(item)}
                         onContextMenu={handleExportTags(item)}
                     >
-                        <p className="normal-text">{item.title}</p>
+                        <p className="normal-text">{t(item.title)}</p>
                         <p className="normal-text">{item.total}</p>
                     </Box>
                 ))}
@@ -163,12 +163,13 @@ const GameStatsBoxList = ({ game, list, teamId, refreshPage, isEdit }) => {
                         onClick={() => handleDisplayVideo(item)}
                         onContextMenu={handleExportTags(item)}
                     >
-                        <p className="normal-text">{item.title}</p>
+                        <p className="normal-text">{t(item.title)}</p>
                         <p className="normal-text">{item.total}</p>
                     </Box>
                 ))}
             </Box>
             <GameStatsVideoPlayer
+                t={t}
                 open={videoOpen}
                 onClose={(flag) => {
                     setVideoOpen(false);
