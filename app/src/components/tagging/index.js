@@ -39,7 +39,9 @@ import { compose } from '@mui/system';
 import Others from './contents/Others';
 import GK from './contents/GK';
 import { getPeriod } from '../newcoach/games/tabs/overview/tagListItem';
-import useVideoPlayer from './useVideoPlayer';
+import hideImg from '../../assets/icons/bx-hide.png';
+import showImg from '../../assets/icons/bx-show.png';
+import useVideoPlayer from './common/useVideoPlayer';
 const drawerWidth = '30%';
 
 const PLAYBACK_RATE = [
@@ -128,9 +130,8 @@ export default function Tagging() {
     }, [game_id]);
 
     const player = React.useRef(null);
-    const overlayElRef = React.useRef(null);
 
-    const seekTo = (sec) => (player.current.currentTime = player.current.currentTime + sec);
+    const seekTo = (sec) => player.current.seekTo(player.current.getCurrentTime() + sec);
 
     const [open, setOpen] = React.useState(true);
     const [modalOpen, setModalOpen] = React.useState(false);
@@ -150,8 +151,23 @@ export default function Tagging() {
     const [teamTagId, setTeamTagId] = React.useState(null);
     const [startTime, setStartTime] = React.useState(null);
     const [teamTagClicked, setTeamTagClicked] = React.useState(true);
-    const [overlayWidth, setOverlayWidth] = React.useState(0);
-    const [overlayHeight, setOverlayHeight] = React.useState(0);
+    const [isShow, setShow] = React.useState(true);
+
+    const overlayElRef = React.useRef(null);
+
+    const [width, setWidth] = React.useState(0);
+    const [height, setHeight] = React.useState(0);
+
+    React.useEffect(() => {
+        setWidth(overlayElRef.current.clientWidth);
+        setHeight(overlayElRef.current.clientHeight);
+    });
+
+    function fnShow() {
+        setShow(!isShow);
+    }
+
+    const { positions } = useVideoPlayer(player, game_id);
 
     const [state, setState] = React.useReducer((old, action) => ({ ...old, ...action }), {
         url: '',
@@ -348,7 +364,7 @@ export default function Tagging() {
         setTeamTagClicked(true);
         setPlay(false);
 
-        const curTime = player.current.currentTime;
+        const curTime = player.current.getCurrentTime();
         setTeamTag({ end_time: toHHMMSS(`${curTime + config.sec_after}`) });
         setPlayerTag({
             team_id: offenseTeamId,
@@ -363,7 +379,7 @@ export default function Tagging() {
             const res = await GameService.addTeamTag({
                 ...teamTag,
 
-                end_time: isCP ? toHHMMSS(player.current.currentTime) : teamTag.end_time
+                end_time: isCP ? toHHMMSS(player.current.getCurrentTime()) : teamTag.end_time
             });
             setModalOpen(false);
             setTeamTag({ id: res.id });
@@ -417,11 +433,6 @@ export default function Tagging() {
         });
     }, [config]);
 
-    React.useEffect(() => {
-        setOverlayWidth(overlayElRef.current.clientWidth);
-        setOverlayHeight(overlayElRef.current.clientHeight);
-    });
-
     const saveTags = async (isCP = false) => {
         setPlay(false);
         let tTag = null;
@@ -465,20 +476,20 @@ export default function Tagging() {
     }, [clicked]);
 
     const offensiveTeamClicked = (team) => {
-        const st = toHHMMSS(`${player.current.currentTime ? player.current.currentTime : 0}`);
+        const st = toHHMMSS(`${player.current.getCurrentTime() ? player.current.getCurrentTime() : 0}`);
         setState({ offense: team, start_time: subSecToHHMMSS(st, 5) });
     };
 
+    // function to display time difference between first tag and current tag in same period
     const displayTagInfo = () => {
-        if (curTeamTag === null || player === null) return '';
-        console.log('current time =>', player.current.currentTime);
+        if (curTeamTag === null) return '';
 
-        const sameTags = teamTagList.filter((item) => item.period === curTeamTag.period);
+        const sameTags = teamTagList.filter((item) => item.period === curTeamTag.period); // get tags that period is same as current tag
 
-        if (player && player.current.currentTime < toSecond(sameTags[sameTags.length - 1].start_time)) return '';
+        if (player && player.current.getCurrentTime() < toSecond(sameTags[sameTags.length - 1].start_time)) return '';
 
         const period = getPeriod(curTeamTag.period);
-        let time = Math.floor(player.current.currentTime) - toSecond(sameTags[sameTags.length - 1].start_time);
+        let time = Math.floor(player.current.getCurrentTime()) - toSecond(sameTags[sameTags.length - 1].start_time); // Calculates the difference
 
         let minutes = Math.floor(time / 60);
         let seconds = time - minutes * 60;
@@ -506,14 +517,6 @@ export default function Tagging() {
             setDefenseTeamGoalKeeper(defPlayers);
         });
     }, [defenseTeam]);
-
-    const { isPlaying, progress, speed, isMuted, positions, togglePlay, handleOnTimeUpdate, handleVideoProgress, handleVideoSpeed, toggleMute, currentframe } = useVideoPlayer(
-        player,
-        displayTagInfo,
-        game_id
-    );
-
-    console.log('tagging position =>', positions, overlayWidth, overlayHeight);
 
     return (
         <Box sx={{ display: 'flex' }}>
@@ -599,7 +602,7 @@ export default function Tagging() {
                     updateTagList={updateTagList}
                     handleRowClick={(row) => {
                         setCurTeamTag(row);
-                        player.current.currentTime = toSecond(row?.start_time);
+                        player.current.seekTo(toSecond(row?.start_time));
                         dispPlayerTags(row?.id);
                     }}
                     selectedId={state.curTeamTagId}
@@ -635,63 +638,104 @@ export default function Tagging() {
                 </div>
                 <Box>
                     <div style={{ maxWidth: '86%', margin: 'auto', position: 'relative' }}>
-                        <video className="video-player" src={state.url} ref={player} onTimeUpdate={handleOnTimeUpdate} controls width="100%" height="97%" />
-                        {curTagStatusText !== '' && (
+                        <div className="player-wrapper">
+                            <ReactPlayer
+                                className="react-player"
+                                url={state.url}
+                                /* url={VIDEO} */
+                                ref={player}
+                                onPlay={() => setPlay(true)}
+                                onPause={() => setPlay(false)}
+                                // onProgress={(p) => setCurTagStatusText(displayTagInfo())} // display time difference between first tag and current tag in same game period
+                                playing={play}
+                                playbackRate={PLAYBACK_RATE[playRate].rate}
+                                controls={true}
+                                width="97%"
+                                height="97%"
+                                style={{
+                                    pointerEvents: 'auto'
+                                }}
+                            />
+
+                            <div className="detection" ref={overlayElRef}>
+                                {isShow &&
+                                    positions.map((item) => {
+                                        let x = item.x;
+                                        let y = item.y;
+                                        let w = item.w;
+                                        let h = item.h;
+                                        let player_id = item.pui;
+                                        let frame_id = item.id;
+
+                                        let xpos = (width * x) / 1920;
+                                        let ypos = (height * y) / 1080;
+                                        let rect_w = (width * w) / 1920;
+                                        let rect_h = (height * h) / 1080;
+
+                                        return (
+                                            <div
+                                                key={frame_id}
+                                                style={{
+                                                    backgroundColor: 'rgba(255, 255, 255, 0)',
+                                                    position: 'absolute',
+                                                    left: xpos,
+                                                    top: ypos - 16,
+                                                    width: rect_w,
+                                                    height: rect_h + 16,
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    alignItems: 'center'
+                                                }}
+                                            >
+                                                <div
+                                                    style={{
+                                                        backgroundColor: 'rgba(0, 0, 0, 0.55)',
+                                                        paddingLeft: 2,
+                                                        paddingRight: 2,
+                                                        width: 'fitContent',
+                                                        height: 16,
+                                                        leftMargin: 'auto',
+                                                        rightMargin: 'auto',
+                                                        fontSize: 12,
+                                                        color: 'white'
+                                                    }}
+                                                >
+                                                    {player_id}
+                                                </div>
+
+                                                <div
+                                                    style={{
+                                                        flexGrow: 1,
+                                                        border: '1px solid red',
+                                                        width: '100%'
+                                                    }}
+                                                ></div>
+                                            </div>
+                                        );
+                                    })}
+                            </div>
+
+                            <div
+                                style={{
+                                    width: '100%',
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 15,
+                                    display: 'flex'
+                                }}
+                            >
+                                <div className="fnbuttons" onClick={fnShow}>
+                                    {isShow ? <img src={hideImg} style={{ filter: 'invert(1)' }} /> : <img src={showImg} style={{ filter: 'invert(1)' }} />}
+                                </div>
+                            </div>
+                        </div>
+                        {/* {curTagStatusText !== '' && (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', position: 'absolute', top: '10px' }}>
                                 <div style={{ background: 'blue', width: 'fit-content', padding: '4px 8px' }}>
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '20px', fontWeight: 500, color: 'white' }}>{curTagStatusText}</Typography>
                                 </div>
                             </div>
-                        )}
-                        <div style={{ display: 'flex', justifyContent: 'space-evenly', position: 'absolute', top: 0, width: '100%', height: '85%', flexWrap: 'wrap' }} ref={overlayElRef}>
-                            {positions.map((item) => {
-                                let x = item.x;
-                                let y = item.y;
-                                let w = item.w;
-                                let h = item.h;
-                                let player_item = item.pui;
-                                let frame_id = item.id;
-
-                                let xpos = (overlayWidth * x) / 1920;
-                                let ypos = (overlayHeight * (y + 100)) / 1080;
-                                let rect_w = (overlayWidth * w) / 1920;
-                                let rect_h = (overlayHeight * h) / 1080;
-
-                                return (
-                                    <div
-                                        key={frame_id}
-                                        style={{
-                                            backgroundColor: 'rgba(0, 255, 128, 0)',
-                                            position: 'absolute',
-                                            left: xpos,
-                                            top: ypos - 16,
-                                            width: rect_w,
-                                            height: rect_h + 16,
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            alignItems: 'center'
-                                        }}
-                                    >
-                                        <div
-                                            style={{
-                                                backgroundColor: 'rgba(0, 0, 0, 0.55)',
-                                                paddingLeft: 2,
-                                                paddingRight: 2,
-                                                width: 'fitContent',
-                                                height: 16,
-                                                leftMargin: 'auto',
-                                                rightMargin: 'auto',
-                                                fontSize: 12,
-                                                color: 'white'
-                                            }}
-                                        >
-                                            {player_item}
-                                        </div>
-                                        <div style={{ flexGrow: 1, border: '1px solid red', width: '100%' }}></div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                        )} */}
                     </div>
                     {open && (
                         <>

@@ -33,6 +33,7 @@ const AcademyControl1 = ({ select }) => {
 
         GameService.addAcademy(academyName, academyCountry).then((res) => {
             setAlertOpen(true);
+            loadAllAcademiesCoach();
         });
     };
 

@@ -31,7 +31,6 @@ import { getComparator, stableSort } from '../components/utilities';
 import { PLAYER_ICON_DEFAULT } from '../../../common/staticData';
 import PlayerEditDialog from './playerEditDialog';
 import TeamPlayerStatDialog from '../teams/tabs/players/status';
-import '../coach_style.css';
 import { getPeriod } from '../games/tabs/overview/tagListItem';
 import TeamStatsVideoPlayer from '../teams/tabs/stats/videoDialog';
 import GameExportToEdits from '../games/tabs/overview/exportEdits';
@@ -333,10 +332,10 @@ const Players = ({ t }) => {
         let teamIds = [];
 
         setLoading(true);
-        await GameService.getAllLeaguesByCoach().then((res) => {
+        await GameService.getAllLeaguesByCoach(currentUser.id).then((res) => {
             leagueIds = getLeagueIds(res);
         });
-        await GameService.getAllTeamsByCoach().then((res) => {
+        await GameService.getAllTeamsByCoach(currentUser.id).then((res) => {
             teamIds = getTeamIds(res);
         });
 
@@ -519,7 +518,7 @@ const Players = ({ t }) => {
                                 initialState={playerStat}
                             />
                             <TeamStatsVideoPlayer t={t} open={videoOpen} onClose={() => setVideoOpen(false)} video_url={gameList} tagList={playData} />
-                            <GameExportToEdits open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
+                            <GameExportToEdits t={t} open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
                             <PlayersGamesDialog t={t} open={gamesOpen} onClose={() => setGamesOpen(false)} list={playerGames} playerName={playerStat?.player_name ?? ''} />
                             <Popover
                                 id={menuPopoverId}

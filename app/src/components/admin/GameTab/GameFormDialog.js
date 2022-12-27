@@ -205,6 +205,21 @@ export default function GameFormDialog({ open, setOpen, gameListUpdated, actionT
         );
     };
 
+    useEffect(async () => {
+        if (actionType === 'Edit' && doneTagging) {
+            await GameService.getAllCoachesByTeam(season.id, league.id, homeTeam.id).then((res) => {
+                res.map(async (item) => {
+                    await GameService.sendEmailToUser(item.id, item.email);
+                });
+            });
+            await GameService.getAllCoachesByTeam(season.id, league.id, awayTeam.id).then((res) => {
+                res.map(async (item) => {
+                    await GameService.sendEmailToUser(item.id, item.email);
+                });
+            });
+        }
+    }, [doneTagging]);
+
     return (
         <Dialog open={open} classes={{ paper: classes.paper }} onClose={() => setOpen(false)} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
             {loading && (

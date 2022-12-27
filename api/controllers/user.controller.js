@@ -1,6 +1,10 @@
 const db = require("../models");
 const User = db.user;
+const User_Subscription = db.user_subscription;
 const Sequelize = db.sequelize;
+
+var bcrypt = require("bcryptjs");
+var randomstring = require("randomstring");
 
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
@@ -322,6 +326,153 @@ exports.getAllAcademyCoaches = (req, res) => {
     join public."Users" on public."Users".id = public."User_Roles"."userId"
     join public."Roles" on public."Roles".id = public."User_Roles"."roleId"
     where public."User_Roles"."roleId" = 3
+    `
+  )
+    .then((data) => {
+      res.send(data[0]);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.getAllUsersWithSubscription = (req, res) => {
+  Sequelize.query(
+    `
+      select
+        public."Users".*,
+        public."User_Subscriptions".id as subscription_id,
+        public."User_Subscriptions".start_date as subscription_start,
+        public."User_Subscriptions".end_date as subscription_end,
+        public."Subscriptions".name as subscription_name
+      from public."Users"
+      join public."User_Subscriptions" on public."User_Subscriptions".user_id = public."Users".id
+      join public."Subscriptions" on public."Subscriptions".id = public."User_Subscriptions".subscription_id
+    `
+  )
+    .then((data) => {
+      res.send(data[0]);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.deleteUser = (req, res) => {
+  Sequelize.query(
+    `delete from public."Users" where public."Users".id = ${req.params.userId}`
+  )
+    .then((data) => {
+      res.send("Successfully deleted");
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.updateUser = (req, res) => {
+  Sequelize.query(
+    `
+    UPDATE public."Users"
+    SET first_name='${req.body.first_name}',
+    last_name='${req.body.last_name}',
+    country='${req.body.country}',
+    phone_number='${req.body.phone}',
+    user_image='${req.body.logo}'
+    WHERE id = ${req.body.userId}
+  `
+  )
+    .then((data) => {
+      res.send("Successfully updated");
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.addNewUser = (req, res) => {
+  const password = randomstring.generate(8);
+
+  User.create({
+    email: req.body.email,
+    password: bcrypt.hashSync(password, 8),
+    first_name: req.body.first_name,
+    last_name: req.body.last_name,
+    country: req.body.country,
+    phone_number: req.body.phone,
+    user_image: req.body.logo,
+  })
+    .then((data) => {
+      User_Subscription.create({
+        user_id: data.id,
+        subscription_id: 3,
+        start_date: new Date(),
+        end_date: new Date(),
+      })
+        .then((data) => {
+          res.send("Successfully added");
+        })
+        .catch((err) => {
+          res.status(500).send({
+            message:
+              err.message || "Some error occurred while retrieving seasons.",
+          });
+        });
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.updateSubscription = (req, res) => {
+  Sequelize.query(
+    `
+      update public."User_Subscriptions"
+      set start_date='${req.params.start}',
+      end_date='${req.params.end}',
+      subscription_id=${req.params.scriptId}
+      where id=${req.params.subId}
+    `
+  )
+    .then((data) => {
+      res.send("Successfully updated");
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.getAllSubscriptions = (req, res) => {
+  Sequelize.query(`select * from public."Subscriptions"`)
+    .then((data) => {
+      res.send(data[0]);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.getAllCoachesByTeam = (req, res) => {
+  Sequelize.query(
+    `
+      select public."Users".*
+      from public."Coach_Teams"
+      join public."Users" on public."Users".id = public."Coach_Teams".user_id
+      where public."Coach_Teams".team_id = ${req.params.teamId} and public."Coach_Teams".season_id = ${req.params.seasonId} and public."Coach_Teams".league_id = ${req.params.leagueId}
     `
   )
     .then((data) => {

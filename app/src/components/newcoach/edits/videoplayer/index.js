@@ -46,7 +46,7 @@ const styles = {
         backgroundColor: '#80808069'
     }
 };
-export default function EditVideoPlayer({ idx, tagList, onChangeClip, drawOpen }) {
+export default function EditVideoPlayer({ idx, tagList, onChangeClip, drawOpen, t }) {
     const handle = useFullScreenHandle();
 
     const player = useRef(null);
@@ -220,7 +220,7 @@ export default function EditVideoPlayer({ idx, tagList, onChangeClip, drawOpen }
                                 <FastRewindIcon color="white" />
                             </IconButton>
                             <Button variant="outlined" sx={{ width: '60px', color: 'white' }} onClick={() => setPlayRate(0.5)}>
-                                Slow
+                                {t('Slow')}
                             </Button>
                             <IconButton
                                 onClick={() => {
@@ -232,7 +232,7 @@ export default function EditVideoPlayer({ idx, tagList, onChangeClip, drawOpen }
                                 {play && playRate === 1 ? <PauseIcon /> : <PlayArrowIcon />}
                             </IconButton>
                             <Button variant="outlined" sx={{ width: '60px', color: 'white' }} onClick={() => setPlayRate((s) => s + 0.5)}>
-                                Fast
+                                {t('Fast')}
                             </Button>
                             <IconButton style={styles.button} onClick={() => fastVideo(3)}>
                                 <FastForwardIcon color="white" />

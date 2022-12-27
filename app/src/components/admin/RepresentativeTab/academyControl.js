@@ -50,6 +50,7 @@ const AcademyControl = ({ representative, select }) => {
         if (editMode === 'Add') {
             GameService.addAcademy(academyName, academyCountry).then((res) => {
                 setAlertOpen(true);
+                loadAllAcademiesByRepresentative();
             });
         } else {
             GameService.editAcademy(editAcademyId, academyName, academyCountry).then((res) => {

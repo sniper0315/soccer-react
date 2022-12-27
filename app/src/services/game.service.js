@@ -665,6 +665,30 @@ const getAllUsers = () => {
     });
 };
 
+const getAllUsersWithSubscription = () => {
+    return axios.get(API_URL + 'user/all_subscription', { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const deleteUser = (userId) => {
+    return axios.delete(API_URL + `user/delete/${userId}`, { headers: authHeader(), data: { userId } }).then((response) => {
+        return response.data;
+    });
+};
+
+const updateUser = (req) => {
+    return axios.post(API_URL + 'user/update', req, { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const addNewUser = (req) => {
+    return axios.post(API_URL + 'user/add', req, { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
 const getAllRepresentatives = () => {
     return axios.get(API_URL + 'user/representative', { headers: authHeader() }).then((response) => {
         return response.data;
@@ -763,6 +787,24 @@ const addAcademyCoach = (userId, academyId) => {
     });
 };
 
+const updateSubscription = (subId, scriptId, start, end) => {
+    return axios.put(API_URL + `user/subscription/update/${subId}/${scriptId}/${start}/${end}`, { subId, start, end }, { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const getAllSubscriptions = () => {
+    return axios.get(API_URL + `user/subscription/all`, { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const getAllCoachesByTeam = (seasonId, leagueId, teamId) => {
+    return axios.get(API_URL + `user/coach/${seasonId}/${leagueId}/${teamId}`, { headers: authHeader(), data: { seasonId, leagueId, teamId } }).then((response) => {
+        return response.data;
+    });
+};
+
 const getAcademyCoach = (userId) => {
     return axios.get(API_URL + `user/academy_coach/get/${userId}`, { headers: authHeader(), data: { userId } }).then((response) => {
         return response.data;
@@ -783,6 +825,12 @@ const deleteAcademyCoach = (userId, academyId) => {
 
 const getAllAcademies = (userId) => {
     return axios.get(API_URL + `user/academy/get/all`, { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const sendEmailToUser = (userId, email) => {
+    return axios.put(API_URL + `game/send_email/${userId}/${email}`, { userId, email }, { headers: authHeader() }).then((response) => {
         return response.data;
     });
 };
@@ -1167,6 +1215,7 @@ const gameService = {
     addTeamToAcademy,
     addHideGame,
     addAcademyCoach,
+    addNewUser,
 
     addUserEdits,
     createUserFolder,
@@ -1204,6 +1253,7 @@ const gameService = {
     getOpponentTags,
     getAllCoach,
     getAllUsers,
+    getAllUsersWithSubscription,
     getAllRepresentatives,
     getAcademiesForRepresentative,
     getTeamsByAcademy,
@@ -1312,6 +1362,8 @@ const gameService = {
     getTeamInitialStanding,
     getEditbyId,
     getShareURL,
+    getAllSubscriptions,
+    getAllCoachesByTeam,
 
     updateJersey,
     updateGame,
@@ -1330,6 +1382,8 @@ const gameService = {
     sendShareEmail,
     verifyShareId,
     editAcademy,
+    updateUser,
+    updateSubscription,
 
     deletePlayersInTeam,
 
@@ -1352,7 +1406,9 @@ const gameService = {
     deleteAcademyFromRepresentative,
     deleteTeamsFromAcademy,
     deleteHideGame,
-    deleteAcademyCoach
+    deleteAcademyCoach,
+    deleteUser,
+    sendEmailToUser
 };
 
 export default gameService;

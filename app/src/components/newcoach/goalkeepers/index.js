@@ -1,20 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-    Box,
-    CircularProgress,
-    Divider,
-    getNativeSelectUtilityClasses,
-    MenuItem,
-    Popover,
-    Select,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TableSortLabel
-} from '@mui/material';
+import { Box, CircularProgress, Divider, MenuItem, Popover, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel } from '@mui/material';
 import { useSelector } from 'react-redux';
 
 import EditIcon from '@mui/icons-material/EditOutlined';
@@ -396,10 +381,10 @@ const Goalkeepers = ({ t }) => {
         let teamIds = [];
 
         setLoading(true);
-        await GameService.getAllLeaguesByCoach().then((res) => {
+        await GameService.getAllLeaguesByCoach(currentUser.id).then((res) => {
             leagueIds = getLeagueIds(res);
         });
-        await GameService.getAllTeamsByCoach().then((res) => {
+        await GameService.getAllTeamsByCoach(currentUser.id).then((res) => {
             teamIds = getTeamIds(res);
         });
 
@@ -551,7 +536,7 @@ const Goalkeepers = ({ t }) => {
                         initialState={playerStat}
                     />
                     <TeamStatsVideoPlayer t={t} open={videoOpen} onClose={() => setVideoOpen(false)} video_url={gameList} tagList={playData} />
-                    <GameExportToEdits open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
+                    <GameExportToEdits t={t} open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
                     <GoalkeepersGamesDialog
                         t={t}
                         open={gamesOpen}
