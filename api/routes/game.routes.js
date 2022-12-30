@@ -388,8 +388,14 @@ module.exports = (app) => {
   );
 
   app.put(
-    "/game/send_email/:userId/:email",
+    "/game/send_email/:userId",
     [authJwt.verifyToken, authJwt.isAdminOrCoach],
     controller.sendEmailToUser
+  );
+
+  app.get(
+    "/game/all/:gameIds",
+    [authJwt.verifyToken, authJwt.isAdminOrCoach],
+    controller.getGamesByIds
   );
 };

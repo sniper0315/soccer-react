@@ -1398,22 +1398,32 @@ sendEmailToCoach = async (email, userId, subject, html) => {
     });
 };
 
-exports.sendEmailToUser = (req, res) => {
+exports.sendEmailToUser = async (req, res) => {
   var html = `<!DOCTYPE html>
             <html>
               <head>
                 <meta charset="UTF-8">
               </head>
               <body>
-                <h2>Done Tagging of Game is checked</h2>
+                <h2>${req.body.text}</h2>
+                Click <a href="${req.body.link}">here</a> to see the game.
               </body>
             </html>`;
 
-  sendEmailToCoach(
-    req.params.email,
-    req.params.userId,
-    "Check Your Email",
-    html
-  );
-  res.send(`Successfully sent to ${req.params.email}`);
+  await sendEmailToCoach(req.body.email, req.body.id, "Game is ready!", html);
+  res.send(`Successfully sent to ${req.body.email}`);
+};
+
+exports.getGamesByIds = (req, res) => {
+  Sequelize.query(
+    `select * from public."Games" where id in (${req.params.gameIds})`
+  )
+    .then((data) => {
+      res.send(data[0]);
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while removing all Games.",
+      });
+    });
 };

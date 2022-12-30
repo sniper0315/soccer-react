@@ -48,6 +48,7 @@ require("./routes/player_tag.routes")(app);
 require("./routes/game.routes")(app);
 
 require("./routes/user_edits.routes")(app);
+require("./routes/multiple_video.routes")(app);
 require("./routes/user.routes")(app);
 require("./routes/whatsapp.routes")(app);
 require("./routes/season.routes")(app);

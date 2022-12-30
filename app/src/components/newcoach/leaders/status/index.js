@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, DialogContent, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogContent, Divider, Popover, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -27,6 +27,12 @@ const LeadersPlayerStatDialog = ({ open, onClose, player, t }) => {
     const [gameList, setGameList] = useState([]);
     const [exportOpen, setExportOpen] = useState(false);
     const [refresh, setRefresh] = useState(false);
+    const [playMode, setPlayMode] = useState(false);
+    const [multipleIds, setMultipleIds] = useState([]);
+
+    const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+    const menuPopoverOpen = Boolean(menuAnchorEl);
+    const menuPopoverId = menuPopoverOpen ? 'simple-popover' : undefined;
 
     const { user: currentUser } = useSelector((state) => state.auth);
 
@@ -150,10 +156,12 @@ const LeadersPlayerStatDialog = ({ open, onClose, player, t }) => {
         }
     };
 
-    const handleDisplayVideo = async (cell) => {
+    const handleDisplayVideo = (cell) => async (e) => {
         if (playerState && playerState[`total_${cell.id}`] > 0 && cell.action !== '') {
             let gameIds = [];
+            const target = e.currentTarget;
 
+            setMultipleIds([]);
             await GameService.getAllGamesByCoach(player.season_id, null, player.team_id, null).then((res) => {
                 setGameList(res.filter((item) => item.video_url.toLowerCase() !== 'no video'));
             });
@@ -179,30 +187,35 @@ const LeadersPlayerStatDialog = ({ open, onClose, player, t }) => {
                 if (cell.title === 'Shots In The Box') data = res.filter((item) => item.inside_the_pain === true);
                 else if (cell.title === 'Shots Out Of The Box' || cell.title === 'Exits') data = res.filter((item) => item.inside_the_pain === false);
 
-                setPlayData(
-                    data.map((item) => {
-                        return {
-                            tag_id: item.id,
-                            start_time: item.player_tag_start_time,
-                            end_time: item.player_tag_end_time,
-                            player_name: item.player_names,
-                            action_name: item.action_names,
-                            action_type: item.action_type_names,
-                            action_result: item.action_result_names,
-                            game_id: item.game_id,
-                            team_id: player.team_id,
-                            court_area: item.court_area_id,
-                            inside_pain: item.inside_the_pain,
-                            period: getPeriod(item.period),
-                            time: item.time_in_game,
-                            home_team_image: item.home_team_logo,
-                            away_team_image: item.away_team_logo,
-                            home_team_goals: item.home_team_goal,
-                            away_team_goals: item.away_team_goal
-                        };
-                    })
-                );
-                setVideoOpen(true);
+                const newData = data.map((item) => {
+                    return {
+                        tag_id: item.id,
+                        start_time: item.player_tag_start_time,
+                        end_time: item.player_tag_end_time,
+                        player_name: item.player_names,
+                        action_name: item.action_names,
+                        action_type: item.action_type_names,
+                        action_result: item.action_result_names,
+                        game_id: item.game_id,
+                        team_id: player.team_id,
+                        court_area: item.court_area_id,
+                        inside_pain: item.inside_the_pain,
+                        period: getPeriod(item.period),
+                        time: item.time_in_game,
+                        home_team_image: item.home_team_logo,
+                        away_team_image: item.away_team_logo,
+                        home_team_goals: item.home_team_goal,
+                        away_team_goals: item.away_team_goal
+                    };
+                });
+
+                newData.map(async (item) => {
+                    await GameService.addMultiple(item).then((data) => {
+                        setMultipleIds((old) => [...old, data[0].id]);
+                    });
+                });
+                setPlayData(newData);
+                setMenuAnchorEl(target);
             });
         }
     };
@@ -246,6 +259,21 @@ const LeadersPlayerStatDialog = ({ open, onClose, player, t }) => {
         if (player) return player.player_position === 'Goalkeeper' ? goalkeeper : statList;
 
         return statList;
+    };
+
+    const handleDisplayMultiple = () => {
+        const gameIds = gameList.map((item) => item.id);
+        const crypt_msg = gameIds.join(',') + '|' + multipleIds.join(',');
+
+        setMenuAnchorEl(null);
+        setPlayMode(true);
+        window.open(`/new_coach/multiple/${btoa(crypt_msg)}`, '_blank');
+    };
+
+    const handleDisplaySingle = () => {
+        setMenuAnchorEl(null);
+        setPlayMode(false);
+        setVideoOpen(true);
     };
 
     useEffect(() => {
@@ -426,7 +454,7 @@ const LeadersPlayerStatDialog = ({ open, onClose, player, t }) => {
                                     background: loading ? 'white' : playerState ? (playerState[`total_${item.id}`] > 0 ? '#F2F7F2' : 'white') : 'white',
                                     cursor: 'pointer'
                                 }}
-                                onClick={() => handleDisplayVideo(item)}
+                                onClick={handleDisplayVideo(item)}
                                 onContextMenu={handleExportTags(item)}
                             >
                                 <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '13px', fontWeight: 500, color: '#1a1b1d' }}>{t(item.title)}</Typography>
@@ -439,18 +467,37 @@ const LeadersPlayerStatDialog = ({ open, onClose, player, t }) => {
                 </Box>
             </DialogContent>
             <GamePlayerStatErrorMessage open={errorOpen} onClose={() => setErrorOpen(false)} />
-            <TeamStatsVideoPlayer
-                t={t}
-                open={videoOpen}
-                onClose={(flag) => {
-                    setVideoOpen(false);
+            {!playMode && (
+                <TeamStatsVideoPlayer
+                    t={t}
+                    open={videoOpen}
+                    onClose={(flag) => {
+                        setVideoOpen(false);
 
-                    if (flag) setRefresh((r) => !r);
-                }}
-                video_url={gameList}
-                tagList={playData}
-            />
+                        if (flag) setRefresh((r) => !r);
+                    }}
+                    video_url={gameList}
+                    tagList={playData}
+                />
+            )}
             <GameExportToEdits t={t} open={exportOpen} onClose={() => setExportOpen(false)} tagList={playData} isTeams={false} />
+            <Popover
+                id={menuPopoverId}
+                open={menuPopoverOpen}
+                anchorEl={menuAnchorEl}
+                onClose={() => setMenuAnchorEl(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                sx={{ '& .MuiPopover-paper': { width: '220px', borderRadius: '12px', border: '1px solid #E8E8E8' } }}
+            >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', cursor: 'pointer' }} onClick={() => handleDisplaySingle()}>
+                    <p className="menu-item">Single Play</p>
+                </Box>
+                <Divider sx={{ width: '100%' }} />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 20px', cursor: 'pointer' }} onClick={() => handleDisplayMultiple()}>
+                    <p className="menu-item">Multiple Play</p>
+                </Box>
+            </Popover>
         </Dialog>
     );
 };

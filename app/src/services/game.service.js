@@ -39,6 +39,30 @@ const addTeam = (req) => {
     });
 };
 
+const addMultiple = (req) => {
+    return axios.post(API_URL + 'multiple', req, { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const getAllMultipleData = () => {
+    return axios.get(API_URL + 'multiple', { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const getAllMultipleDataByIds = (ids) => {
+    return axios.get(API_URL + `multiple/get/${ids}`, { headers: authHeader(), data: { ids } }).then((response) => {
+        return response.data;
+    });
+};
+
+const deleteAllMultiple = () => {
+    return axios.delete(API_URL + 'multiple', { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
 const getAllTeams = () => {
     return axios.get(API_URL + 'team', { headers: authHeader() }).then((response) => {
         return response.data;
@@ -77,6 +101,12 @@ const getTeamGoals = (teamId, gameIds) => {
 
 const getOpponentGoals = (teamId, gameIds) => {
     return axios.get(API_URL + `game/getopponentgoals/${teamId}/${gameIds}`, { headers: authHeader(), data: { teamId, gameIds } }).then((response) => {
+        return response.data;
+    });
+};
+
+const getGamesByIds = (gameIds) => {
+    return axios.get(API_URL + `game/all/${gameIds}`, { headers: authHeader(), data: { gameIds } }).then((response) => {
         return response.data;
     });
 };
@@ -829,8 +859,8 @@ const getAllAcademies = (userId) => {
     });
 };
 
-const sendEmailToUser = (userId, email) => {
-    return axios.put(API_URL + `game/send_email/${userId}/${email}`, { userId, email }, { headers: authHeader() }).then((response) => {
+const sendEmailToUser = (req) => {
+    return axios.put(API_URL + `game/send_email/${req.id}`, req, { headers: authHeader(), data: { id: req.id } }).then((response) => {
         return response.data;
     });
 };
@@ -1216,6 +1246,7 @@ const gameService = {
     addHideGame,
     addAcademyCoach,
     addNewUser,
+    addMultiple,
 
     addUserEdits,
     createUserFolder,
@@ -1364,6 +1395,9 @@ const gameService = {
     getShareURL,
     getAllSubscriptions,
     getAllCoachesByTeam,
+    getAllMultipleData,
+    getAllMultipleDataByIds,
+    getGamesByIds,
 
     updateJersey,
     updateGame,
@@ -1408,7 +1442,8 @@ const gameService = {
     deleteHideGame,
     deleteAcademyCoach,
     deleteUser,
-    sendEmailToUser
+    sendEmailToUser,
+    deleteAllMultiple
 };
 
 export default gameService;

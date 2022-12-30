@@ -409,6 +409,7 @@ exports.addNewUser = (req, res) => {
     country: req.body.country,
     phone_number: req.body.phone,
     user_image: req.body.logo,
+    is_verified: true,
   })
     .then((data) => {
       User_Subscription.create({

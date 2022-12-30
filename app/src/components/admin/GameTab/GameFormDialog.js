@@ -27,6 +27,7 @@ import GameService from '../../../services/game.service';
 import Upload from '../../../common/upload';
 import PlayerFormDialog from '../PlayerTab/PlayerFormDialog';
 import TeamFormDialog from '../TeamTab/TeamFormDialog';
+import { getFormattedDate } from '../../newcoach/components/utilities';
 
 const useStyles = makeStyles((theme) => ({
     paper: { minWidth: '90%' },
@@ -207,18 +208,23 @@ export default function GameFormDialog({ open, setOpen, gameListUpdated, actionT
 
     useEffect(async () => {
         if (actionType === 'Edit' && doneTagging) {
+            const text = `Game ${homeTeam.name} vs ${awayTeam.name} from ${getFormattedDate(gameDate)} is now tagged and ready for watching.`;
+            const link = `https://soccer.scouting4u.com/new_coach/games/${btoa(editData.id)}`;
+
             await GameService.getAllCoachesByTeam(season.id, league.id, homeTeam.id).then((res) => {
                 res.map(async (item) => {
-                    await GameService.sendEmailToUser(item.id, item.email);
+                    await GameService.sendEmailToUser({ id: item.id, email: item.email, text: text, link: link });
                 });
             });
             await GameService.getAllCoachesByTeam(season.id, league.id, awayTeam.id).then((res) => {
                 res.map(async (item) => {
-                    await GameService.sendEmailToUser(item.id, item.email);
+                    await GameService.sendEmailToUser({ id: item.id, email: item.email, text: text, link: link });
                 });
             });
         }
     }, [doneTagging]);
+
+    console.log('Game Edit =>', homeTeam, awayTeam);
 
     return (
         <Dialog open={open} classes={{ paper: classes.paper }} onClose={() => setOpen(false)} scroll="paper" aria-labelledby="scroll-dialog-title" aria-describedby="scroll-dialog-description">
