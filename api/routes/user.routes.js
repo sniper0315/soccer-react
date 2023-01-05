@@ -143,7 +143,7 @@ module.exports = function (app) {
   app.get(
     "/user/all_subscription",
     [authJwt.verifyToken, authJwt.isAdmin],
-    controller.getAllUsersWithSubscription
+    controller.getAllUserSubscriptions
   );
 
   app.delete(
@@ -168,6 +168,12 @@ module.exports = function (app) {
     "/user/subscription/update/:subId/:scriptId/:start/:end",
     [authJwt.verifyToken, authJwt.isAdminOrCoach],
     controller.updateSubscription
+  );
+
+  app.put(
+    "/user/subscription/add/:userId/:subId/:start/:end",
+    [authJwt.verifyToken, authJwt.isAdminOrCoach],
+    controller.addUserSubscription
   );
 
   app.get(

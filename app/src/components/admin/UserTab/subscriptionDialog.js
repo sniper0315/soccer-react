@@ -16,17 +16,24 @@ const SubscriptionDialog = ({ open, onClose, user, refresh }) => {
     const [subscription, setSubscription] = useState(null);
 
     const handleUpdateSubscription = () => {
-        GameService.updateSubscription(user.subscription_id, subscription.id, startDate, endDate).then((res) => {
-            onClose();
-            refresh((r) => !r);
-        });
+        if (user.subscription_id) {
+            GameService.updateSubscription(user.subscription_id, subscription.id, startDate, endDate).then((res) => {
+                onClose();
+                refresh((r) => !r);
+            });
+        } else {
+            GameService.addUserSubscription(user.id, subscription.id, startDate, endDate).then((res) => {
+                onClose();
+                refresh((r) => !r);
+            });
+        }
     };
 
     useEffect(() => {
         if (user) {
-            setStartDate(user?.subscription_start);
-            setEndDate(user?.subscription_end);
-            setSubscription(subscriptionList.filter((item) => item.name.toLowerCase() === user.subscription_name)[0]);
+            setStartDate(user?.subscription_start ?? new Date().toDateString());
+            setEndDate(user?.subscription_end ?? new Date().toDateString());
+            setSubscription(user.subscription_name ? subscriptionList.filter((item) => item.name.toLowerCase() === user.subscription_name)[0] : '');
         }
     }, [open]);
 

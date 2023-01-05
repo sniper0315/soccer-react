@@ -100,12 +100,41 @@ const AdminUserTab = ({ t }) => {
         ).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
     };
 
+    const getUserSubscription = (id, list, names) => {
+        const filtt = list.filter((item) => item.user_id === id);
+
+        if (filtt.length === 0) return null;
+
+        return { id: filtt[0].id, name: names.filter((item) => item.id === filtt[0].subscription_id)[0].name, start: filtt[0].start_date, end: filtt[0].end_date };
+    };
+
     useEffect(() => {
         setLoading(true);
         setUserList([]);
         setSelectedUser(null);
-        GameService.getAllUsersWithSubscription().then((res) => {
-            setUserList(res);
+        GameService.getAllUsers().then(async (res) => {
+            let user_subscriptions = [];
+            let subscriptions = [];
+
+            await GameService.getAllUserSubscriptions().then((data) => {
+                user_subscriptions = data;
+            });
+            await GameService.getAllSubscriptions().then((data) => {
+                subscriptions = data;
+            });
+            setUserList(
+                res.map((item) => {
+                    const user_sub = getUserSubscription(item.id, user_subscriptions, subscriptions);
+
+                    return {
+                        ...item,
+                        subscription_id: user_sub ? user_sub.id : null,
+                        subscription_start: user_sub ? user_sub.start : null,
+                        subscription_end: user_sub ? user_sub.end : null,
+                        subscription_name: user_sub ? user_sub.name : null
+                    };
+                })
+            );
             setLoading(false);
         });
     }, [refreshPage]);
@@ -193,9 +222,9 @@ const AdminUserTab = ({ t }) => {
                                             <TableCell align="center">{`${item.first_name} ${item.last_name}`}</TableCell>
                                             <TableCell align="center">{item.email}</TableCell>
                                             <TableCell align="center">{item.country}</TableCell>
-                                            <TableCell align="center">{item.subscription_name}</TableCell>
-                                            <TableCell align="center">{getFormattedDate(item.subscription_start)}</TableCell>
-                                            <TableCell align="center">{getFormattedDate(item.subscription_end)}</TableCell>
+                                            <TableCell align="center">{item.subscription_name ? item.subscription_name : ''}</TableCell>
+                                            <TableCell align="center">{item.subscription_start ? getFormattedDate(item.subscription_start) : ''}</TableCell>
+                                            <TableCell align="center">{item.subscription_end ? getFormattedDate(item.subscription_end) : ''}</TableCell>
                                             <TableCell align="center" sx={{ width: 100 }}>
                                                 <Button
                                                     variant="outlined"

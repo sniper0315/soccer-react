@@ -695,7 +695,7 @@ const getAllUsers = () => {
     });
 };
 
-const getAllUsersWithSubscription = () => {
+const getAllUserSubscriptions = () => {
     return axios.get(API_URL + 'user/all_subscription', { headers: authHeader() }).then((response) => {
         return response.data;
     });
@@ -818,7 +818,13 @@ const addAcademyCoach = (userId, academyId) => {
 };
 
 const updateSubscription = (subId, scriptId, start, end) => {
-    return axios.put(API_URL + `user/subscription/update/${subId}/${scriptId}/${start}/${end}`, { subId, start, end }, { headers: authHeader() }).then((response) => {
+    return axios.put(API_URL + `user/subscription/update/${subId}/${scriptId}/${start}/${end}`, { subId, scriptId, start, end }, { headers: authHeader() }).then((response) => {
+        return response.data;
+    });
+};
+
+const addUserSubscription = (userId, subId, start, end) => {
+    return axios.put(API_URL + `user/subscription/add/${userId}/${subId}/${start}/${end}`, { userId, subId, start, end }, { headers: authHeader() }).then((response) => {
         return response.data;
     });
 };
@@ -1247,6 +1253,7 @@ const gameService = {
     addAcademyCoach,
     addNewUser,
     addMultiple,
+    addUserSubscription,
 
     addUserEdits,
     createUserFolder,
@@ -1284,7 +1291,7 @@ const gameService = {
     getOpponentTags,
     getAllCoach,
     getAllUsers,
-    getAllUsersWithSubscription,
+    getAllUserSubscriptions,
     getAllRepresentatives,
     getAcademiesForRepresentative,
     getTeamsByAcademy,

@@ -338,18 +338,12 @@ exports.getAllAcademyCoaches = (req, res) => {
     });
 };
 
-exports.getAllUsersWithSubscription = (req, res) => {
+exports.getAllUserSubscriptions = (req, res) => {
   Sequelize.query(
     `
       select
-        public."Users".*,
-        public."User_Subscriptions".id as subscription_id,
-        public."User_Subscriptions".start_date as subscription_start,
-        public."User_Subscriptions".end_date as subscription_end,
-        public."Subscriptions".name as subscription_name
-      from public."Users"
-      join public."User_Subscriptions" on public."User_Subscriptions".user_id = public."Users".id
-      join public."Subscriptions" on public."Subscriptions".id = public."User_Subscriptions".subscription_id
+        public."User_Subscriptions".*
+      from public."User_Subscriptions"
     `
   )
     .then((data) => {
@@ -414,7 +408,7 @@ exports.addNewUser = (req, res) => {
     .then((data) => {
       User_Subscription.create({
         user_id: data.id,
-        subscription_id: 3,
+        subscription_id: 2,
         start_date: new Date(),
         end_date: new Date(),
       })
@@ -447,6 +441,23 @@ exports.updateSubscription = (req, res) => {
   )
     .then((data) => {
       res.send("Successfully updated");
+    })
+    .catch((err) => {
+      res.status(500).send({
+        message: err.message || "Some error occurred while retrieving seasons.",
+      });
+    });
+};
+
+exports.addUserSubscription = (req, res) => {
+  User_Subscription.create({
+    user_id: req.params.userId,
+    subscription_id: req.params.subId,
+    start_date: req.params.start,
+    end_date: req.params.end,
+  })
+    .then((data) => {
+      res.send("Successfully added");
     })
     .catch((err) => {
       res.status(500).send({
