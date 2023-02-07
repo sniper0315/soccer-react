@@ -42,7 +42,11 @@ import { getPeriod } from '../newcoach/games/tabs/overview/tagListItem';
 import hideImg from '../../assets/icons/bx-hide.png';
 import showImg from '../../assets/icons/bx-show.png';
 import useVideoPlayer from './common/useVideoPlayer';
+import LabelView from './labelView';
+
+
 const drawerWidth = '30%';
+
 
 const PLAYBACK_RATE = [
     { rate: 0.3, label: 'x 0.3' },
@@ -136,14 +140,15 @@ export default function Tagging() {
     const [open, setOpen] = React.useState(true);
     const [modalOpen, setModalOpen] = React.useState(false);
     const [modalContent, setModalContent] = React.useState('');
-
     const [count, setCount] = React.useState(0);
+
     const [teamTagList, setTeamTagList] = React.useState([]);
+
     const [playerTagList, setPlayerTagList] = React.useState([]);
     const [tagCnt, setTagCnt] = React.useState(0);
     const [temp_playerTag_list, setTempPlayerTagList] = React.useState([]);
     const [play, setPlay] = React.useState(false);
-    const [playRate, setPlayRate] = React.useState(3);
+    const [playRate, setPlayRate] = React.useState(2);
     const [clicked, setClicked] = React.useState(false);
     const [curTeamTag, setCurTeamTag] = React.useState(null);
     const [curTagStatusText, setCurTagStatusText] = React.useState('');
@@ -167,7 +172,8 @@ export default function Tagging() {
         setShow(!isShow);
     }
 
-    const { positions } = useVideoPlayer(player, game_id);
+    const { labeldata, videoCufr } = useVideoPlayer(player, game_id);
+
 
     const [state, setState] = React.useReducer((old, action) => ({ ...old, ...action }), {
         url: '',
@@ -276,6 +282,7 @@ export default function Tagging() {
         if (game_id <= 0) return;
 
         GameService.getAllTeamTagsByGame(game_id).then((res) => {
+
             setTeamTagList(res);
             if (!res.length) {
                 setPlayerTagList([]);
@@ -518,6 +525,38 @@ export default function Tagging() {
         });
     }, [defenseTeam]);
 
+    const [positions, setPositions] = React.useState([]);
+
+
+    React.useEffect(() => {
+        let flag = false
+        for(let f=0;f<5;f++)
+        {
+            let currentframe = videoCufr + f;
+            if (labeldata[currentframe] != undefined) {
+                let posData = [];
+                for (let i = 0; i < labeldata[currentframe].length; i++) {
+                    let pos = {};
+                    pos['x'] = labeldata[currentframe][i].x;
+                    pos['y'] = labeldata[currentframe][i].y;
+                    pos['pui'] = labeldata[currentframe][i].pui;
+                    pos['w'] = labeldata[currentframe][i].w;
+                    pos['h'] = labeldata[currentframe][i].h;
+                    pos['id'] = labeldata[currentframe][i].id;
+                    posData.push(pos);
+                }
+                setPositions(posData);
+                flag = true
+                break;
+            }
+        }
+
+        if (!flag){
+            setPositions([]);
+        }
+
+    }, [videoCufr])
+
     return (
         <Box sx={{ display: 'flex' }}>
             <Modal disableAutoFocus open={modalOpen} onClose={() => setModalOpen(false)} aria-labelledby="modal-modal-title" aria-describedby="modal-modal-description">
@@ -642,11 +681,19 @@ export default function Tagging() {
                             <ReactPlayer
                                 className="react-player"
                                 url={state.url}
-                                /* url={VIDEO} */
+  
                                 ref={player}
                                 onPlay={() => setPlay(true)}
                                 onPause={() => setPlay(false)}
-                                // onProgress={(p) => setCurTagStatusText(displayTagInfo())} // display time difference between first tag and current tag in same game period
+                                // onDuration ={(duration) => {
+                                //     let videoDr = duration
+                                // }}
+                                // onProgress={(progress) =>{
+                                //     if (videoDr>0){
+                                //         let videoEls = progress.played * videoDr
+                                //         console.log("Elasped:", videoEls)
+                                //     }                                    
+                                // }}
                                 playing={play}
                                 playbackRate={PLAYBACK_RATE[playRate].rate}
                                 controls={true}
@@ -656,65 +703,12 @@ export default function Tagging() {
                                     pointerEvents: 'auto'
                                 }}
                             />
-
                             <div className="detection" ref={overlayElRef}>
                                 {isShow &&
-                                    positions.map((item) => {
-                                        let x = item.x;
-                                        let y = item.y;
-                                        let w = item.w;
-                                        let h = item.h;
-                                        let player_id = item.pui;
-                                        let frame_id = item.id;
-
-                                        let xpos = (width * x) / 1920;
-                                        let ypos = (height * y) / 1080;
-                                        let rect_w = (width * w) / 1920;
-                                        let rect_h = (height * h) / 1080;
-
-                                        return (
-                                            <div
-                                                key={frame_id}
-                                                style={{
-                                                    backgroundColor: 'rgba(255, 255, 255, 0)',
-                                                    position: 'absolute',
-                                                    left: xpos,
-                                                    top: ypos - 16,
-                                                    width: rect_w,
-                                                    height: rect_h + 16,
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    alignItems: 'center'
-                                                }}
-                                            >
-                                                <div
-                                                    style={{
-                                                        backgroundColor: 'rgba(0, 0, 0, 0.55)',
-                                                        paddingLeft: 2,
-                                                        paddingRight: 2,
-                                                        width: 'fitContent',
-                                                        height: 16,
-                                                        leftMargin: 'auto',
-                                                        rightMargin: 'auto',
-                                                        fontSize: 12,
-                                                        color: 'white'
-                                                    }}
-                                                >
-                                                    {player_id}
-                                                </div>
-
-                                                <div
-                                                    style={{
-                                                        flexGrow: 1,
-                                                        border: '1px solid red',
-                                                        width: '100%'
-                                                    }}
-                                                ></div>
-                                            </div>
-                                        );
-                                    })}
+                                    <LabelView positions={positions} width={width} height={height}/>
+                                }
                             </div>
-
+                            
                             <div
                                 style={{
                                     width: '100%',
@@ -729,13 +723,6 @@ export default function Tagging() {
                                 </div>
                             </div>
                         </div>
-                        {/* {curTagStatusText !== '' && (
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', position: 'absolute', top: '10px' }}>
-                                <div style={{ background: 'blue', width: 'fit-content', padding: '4px 8px' }}>
-                                    <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontSize: '20px', fontWeight: 500, color: 'white' }}>{curTagStatusText}</Typography>
-                                </div>
-                            </div>
-                        )} */}
                     </div>
                     {open && (
                         <>

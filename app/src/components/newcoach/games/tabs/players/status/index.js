@@ -242,6 +242,8 @@ const GamePlayerStatDialog = ({ open, onClose, player, game, teamId, initialStat
     };
 
     const handleDisplayMultiple = () => {
+        if (playData.length !== multipleIds.length) return;
+
         const crypt_msg = game.id + '|' + multipleIds.join(',');
 
         setMenuAnchorEl(null);

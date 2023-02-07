@@ -243,6 +243,8 @@ const TeamPlayerOverviewStatDialog = ({ open, onClose, player, gameIds, games, t
     };
 
     const handleDisplayMultiple = () => {
+        if (playData.length !== multipleIds.length) return;
+
         const crypt_msg = gameIds.join(',') + '|' + multipleIds.join(',');
 
         setMenuAnchorEl(null);
@@ -307,7 +309,7 @@ const TeamPlayerOverviewStatDialog = ({ open, onClose, player, gameIds, games, t
         }
     }, [refresh]);
 
-    console.log('$$$$$', playData);
+    console.log('$$$$$', multipleIds);
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="1500px">

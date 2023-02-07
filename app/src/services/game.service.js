@@ -57,6 +57,12 @@ const getAllMultipleDataByIds = (ids) => {
     });
 };
 
+const deleteMultipleDataByIds = (ids) => {
+    return axios.delete(API_URL + `multiple/delete/${ids}`, { headers: authHeader(), data: { ids } }).then((response) => {
+        return response.data;
+    });
+};
+
 const deleteAllMultiple = () => {
     return axios.delete(API_URL + 'multiple', { headers: authHeader() }).then((response) => {
         return response.data;
@@ -847,7 +853,7 @@ const getAcademyCoach = (userId) => {
     });
 };
 
-const getAllAcademyCoaches = (userId) => {
+const getAllAcademyCoaches = () => {
     return axios.get(API_URL + `user/academy_coach/all`, { headers: authHeader() }).then((response) => {
         return response.data;
     });
@@ -1450,7 +1456,8 @@ const gameService = {
     deleteAcademyCoach,
     deleteUser,
     sendEmailToUser,
-    deleteAllMultiple
+    deleteAllMultiple,
+    deleteMultipleDataByIds
 };
 
 export default gameService;

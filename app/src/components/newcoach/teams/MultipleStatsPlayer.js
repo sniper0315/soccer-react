@@ -73,6 +73,17 @@ const MultipleStatsVideoPlayer = ({ t }) => {
         player.current.seekTo(toSecond(tagList[index].start_time));
     };
 
+    const deleteRowsBeforeUnload = (rows) => (e) => {
+        e.preventDefault();
+        window.alert(rows);
+        console.log('unload =>', rows);
+
+        GameService.deleteMultipleDataByIds(rows);
+        e.returnValue = rows;
+
+        return '';
+    };
+
     useEffect(async () => {
         const pathname = window.location.pathname;
 
@@ -83,6 +94,7 @@ const MultipleStatsVideoPlayer = ({ t }) => {
             console.log('multiple params =>', splits);
             setCurrentIndex(0);
             setVideoList([]);
+            window.addEventListener('beforeunload', deleteRowsBeforeUnload(splits[1]));
             await GameService.getGamesByIds(splits[0]).then((res) => {
                 res.map(async (game) => {
                     if (game.video_url.startsWith('https://www.youtube.com')) {
@@ -98,6 +110,10 @@ const MultipleStatsVideoPlayer = ({ t }) => {
 
                 if (list.length > 0 && res.length > 0) setVideoURL(list.filter((item) => item.id === res[0].game_id)[0].url);
             });
+
+            return () => {
+                window.removeEventListener('beforeunload', deleteRowsBeforeUnload);
+            };
         }
     }, [params]);
 

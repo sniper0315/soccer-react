@@ -230,6 +230,8 @@ const GoalkeeperStatDialog = ({ open, onClose, player, teamId, seasonId, games, 
     };
 
     const handleDisplayMultiple = () => {
+        if (playData.length !== multipleIds.length) return;
+
         const crypt_msg = gameIds.join(',') + '|' + multipleIds.join(',');
 
         setMenuAnchorEl(null);

@@ -9,7 +9,6 @@ import {
 export default function TCellPositionEdit({ value, rows, update }) {
 
     const [editable, setEditable] = React.useState(false)
-
     const [temp, setTemp] = React.useState(value?.id)
 
     const updateValue = (v) => {
@@ -21,6 +20,7 @@ export default function TCellPositionEdit({ value, rows, update }) {
     }
 
     return (
+
         <TableCell
             align="left"
             onClick={() => setEditable(true)}
@@ -42,5 +42,6 @@ export default function TCellPositionEdit({ value, rows, update }) {
                 : <>{value?.name}</>
             }
         </TableCell>
+        
     );
 }

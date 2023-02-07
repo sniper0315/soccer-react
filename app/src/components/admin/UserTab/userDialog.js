@@ -12,10 +12,11 @@ const UserDialog = ({ open, onClose, mode, user, refresh }) => {
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
     const [country, setCountry] = useState('');
+    const [subscription, setSubscription] = useState(null);
 
     const saveChanges = () => {
         if (mode === 'Add') {
-            GameService.addNewUser({ first_name: firstName, last_name: lastName, email: email, phone: phone, country: country, logo: userLogo }).then((res) => {
+            GameService.addNewUser({ first_name: firstName, last_name: lastName, email: email, phone: phone, country: country, logo: userLogo, role: subscription.id }).then((res) => {
                 onClose();
                 refresh((r) => !r);
             });
@@ -43,6 +44,10 @@ const UserDialog = ({ open, onClose, mode, user, refresh }) => {
             setPhone(user?.phone_number ?? '');
             setCountry(user?.country ?? '');
         }
+
+        GameService.getAllSubscriptions().then((res) => {
+            setSubscription(res.filter((item) => item.name === 'coach')[0]);
+        });
     }, [open, mode, user]);
 
     return (

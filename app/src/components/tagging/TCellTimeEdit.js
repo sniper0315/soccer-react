@@ -1,9 +1,11 @@
 import * as React from 'react';
+
 import {
-    TableCell,
     Input,
 } from '@mui/material';
+
 import { IMaskInput } from 'react-imask';
+
 
 const TextMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) {
     const { onChange, ...other } = props;
@@ -20,6 +22,7 @@ const TextMaskCustom = React.forwardRef(function TextMaskCustom(props, ref) {
         />
     );
 });
+
 
 export default function TCellEdit({ value, update, start, end }) {
 
@@ -38,7 +41,7 @@ export default function TCellEdit({ value, update, start, end }) {
     }
 
     return (
-        <TableCell
+        <td
             align="center"
             onClick={() => setEditable(true)}
         >
@@ -61,6 +64,6 @@ export default function TCellEdit({ value, update, start, end }) {
                 />
                 : <>{value}</>
             }
-        </TableCell>
+        </td>
     );
 }

@@ -63,7 +63,6 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games, t }) => 
     const getSortedArray = () => {
         if (playerList.length > 0 && detectStats.length > 0) {
             const sortedStats = stableSort(detectStats, getComparator(order, orderBy));
-            const other = playerList.filter((item) => !playerIds.includes(item.id));
             const inside = playerList.filter((item) => playerIds.includes(item.id));
             let newList = [];
 
@@ -71,11 +70,6 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games, t }) => 
                 const newItem = inside.filter((data) => data.id === item.player_id);
 
                 if (newItem.length === 1) newList = [...newList, newItem[0]];
-
-                return newList;
-            });
-            other.map((item) => {
-                newList = [...newList, item];
 
                 return newList;
             });
@@ -214,7 +208,7 @@ const TeamPlayersStats = ({ teamId, seasonId, leagueId, gameIds, games, t }) => 
             let newArray = [];
 
             data.map((item) => {
-                const filt = newArray.filter((data) => item.player_id === data.player_id);
+                const filt = newArray.filter((res) => item.player_id === res.player_id);
 
                 if (filt.length === 0) newArray = [...newArray, item];
 

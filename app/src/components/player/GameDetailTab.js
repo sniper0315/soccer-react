@@ -11,12 +11,9 @@ import { PlayerContext } from './index';
 
 export default function GameDetailTab({ playTags, gameList, seasonId, t }) {
     const { context, setContext } = useContext(PlayerContext);
-
     const playerId = context.player.id;
     const game = context.game;
-
     const [showHighlight, setShowHighlight] = useState(false);
-
     const [value, setValue] = React.useState(1);
 
     const handleChange = (event, newValue) => {
@@ -26,7 +23,6 @@ export default function GameDetailTab({ playTags, gameList, seasonId, t }) {
 
     useEffect(() => {
         if (!playerId || !game) return;
-
         GameService.getTeamByPlayerGame(playerId, game?.game_id).then((res) => {
             setShowHighlight(!!res.create_highlights);
         });
@@ -61,11 +57,12 @@ export default function GameDetailTab({ playTags, gameList, seasonId, t }) {
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
-
     return (
+
         <div role="tabpanel" hidden={value !== index} id={`simple-tabpanel-${index}`} aria-labelledby={`simple-tab-${index}`} {...other}>
             {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
         </div>
+        
     );
 }
 

@@ -65,11 +65,9 @@ export default function Player() {
     const [open, setOpen] = useState(false);
     const [fullVideo, setFullVideo] = useState(false);
     const [playTags, setPlayTags] = useState([]);
-
     const [context, setContext] = useReducer((old, action) => ({ ...old, ...action }), {});
 
     const game = context.game;
-
     const value = useMemo(() => ({ context, setContext }), [context]);
 
     const [primaryColor, setPrimaryColor] = useState(defaultPrimaryColor);
@@ -125,12 +123,7 @@ export default function Player() {
         i18next.changeLanguage(language);
     }, [language]);
 
-    const numClicked = (gameId, key) => {
-        GameService.getPlayerTagsByActionName(playerId, gameId, key).then((res) => {
-            // setPlayTags(res); setOpen(true)
-        });
-    };
-
+    
     const getImage = (item) => {
         return item.image && item.image.length > 0 ? item.image : GameImage;
     };
@@ -156,15 +149,11 @@ export default function Player() {
 
             desc.map((item) => {
                 const filter = result.filter((season) => season.name === item.season_name);
-
                 if (filter.length === 0) result = [...result, { name: item.season_name, id: item.season_id }];
-
                 return result;
             });
-
             return result;
         }
-
         return [];
     };
 

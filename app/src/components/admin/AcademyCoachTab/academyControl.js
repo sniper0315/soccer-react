@@ -93,7 +93,7 @@ const AcademyControl1 = ({ select }) => {
                                     <Typography sx={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 500, fontSize: '0.7rem', color: 'white' }}>{item.name}</Typography>
                                 </div>
                                 {selectedIndex === index && (
-                                    <IconButton onClick={() => handleDeleteAcademy()}>
+                                    <IconButton onClick={() => handleDeleteAcademy(item)}>
                                         <DeleteIcon />
                                     </IconButton>
                                 )}

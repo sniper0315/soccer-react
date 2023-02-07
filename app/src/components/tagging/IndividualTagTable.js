@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import Paper from '@mui/material/Paper';
 import TCellTimeEdit from './TCellTimeEdit';
@@ -17,6 +11,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 import DeleteConfirmDialog from '../../common/DeleteConfirmDialog';
 import Modal from '@mui/material/Modal';
 import PlayerTagForm from './PlayerTagForm';
+
+import trashImg from '../../assets/icons/bx-trash.png';
 
 const style = {
     position: 'absolute',
@@ -113,10 +109,10 @@ export default function IndividualTagTable({ rows, offenseTeamId, offenseTeam, u
                         setOpenModal(true)
                     }} />
                 </Box>
-                <TableContainer style={{ height: '86%' }}>
-                    <Table stickyHeader aria-label="sticky table" size={'small'} sx={{ pb: 4 }}>
-                        <TableHead>
-                            <TableRow>
+                <div style={{ height: '86%', overflow: 'auto'}}>
+                    <table style={{minWidth:"500px", width:'100%'}}>
+                        <thead>
+                            <tr style={{backgroundColor:'#121212', height:'30px'}}>
                                 <TableCell align="center">Action</TableCell>
                                 <TableCell align="center">Action Type</TableCell>
                                 <TableCell align="center">Action Result</TableCell>
@@ -124,9 +120,9 @@ export default function IndividualTagTable({ rows, offenseTeamId, offenseTeam, u
                                 <TableCell align="center">Start Time</TableCell>
                                 <TableCell align="center">End Time</TableCell>
                                 <TableCell align="center"></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
+                            </tr>
+                        </thead>
+                        <tbody>
                             {loading ? (
                                 <TableRow>
                                     <TableCell colSpan={7} align="center">
@@ -136,8 +132,9 @@ export default function IndividualTagTable({ rows, offenseTeamId, offenseTeam, u
                             ) : (
                                 <>
                                     {rows.map((row) => {
+
                                         return (
-                                            <TableRow hover role="checkbox" tabIndex={-1} key={row.id} selected={selectedRow?.id === row.id}>
+                                            <tr hover="true" style={{background: selectedRow?.id === row.id ? 'rgba(144, 202, 249, 0.16)' :'transparent'}} className="tableline" role="checkbox" tabIndex={-1} key={row.id} selected={selectedRow?.id === row.id}>
                                                 <TCellSelectEdit rows={actions} value={{ id: row.action_id, name: row.action_name }} update={(v) => update({ ...row, action_id: v })} />
                                                 <TCellSelectEdit
                                                     rows={actionTypes}
@@ -156,25 +153,22 @@ export default function IndividualTagTable({ rows, offenseTeamId, offenseTeam, u
                                                 />
                                                 <TCellTimeEdit value={row.start_time} update={(v) => update({ ...row, start_time: v })} end={row.end_time} />
                                                 <TCellTimeEdit value={row.end_time} update={(v) => update({ ...row, end_time: v })} start={row.start_time} />
-                                                <TableCell align="center" sx={{ p: 0, m: 0 }}>
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() => {
-                                                            setDeleteOpen(true);
-                                                            setSelectedRow(row);
-                                                        }}
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </TableCell>
-                                            </TableRow>
+                                                <td style={{width:'50px'}} className="trashcell">
+                                                    <img src={trashImg} style={{ filter: 'invert(1)', display:'block'}} width="90%" onClick={() => {
+                                                        setDeleteOpen(true);
+                                                        setSelectedRow(row);
+                                                    }} />
+                                                </td>
+                                            </tr>
+
                                         );
+                                        
                                     })}
                                 </>
                             )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                        </tbody>
+                    </table>
+                </div>
             </Paper>
         </Box>
     );

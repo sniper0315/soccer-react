@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import gameService from '../../../services/game.service';
 
+
 const useVideoPlayer = (videoElement, game_id) => {
-    const [positions, setPositions] = useState([]);
+    const [labeldata, setLabeldata] = useState({})
+    const [videoCufr, setVideoCufr] = useState(0)
     const retreiving = useRef(false);
 
     let detectdata = {};
@@ -15,11 +17,11 @@ const useVideoPlayer = (videoElement, game_id) => {
 
     const retreivedata = async (strHr, strMin, strsec, minTobackward, minToforward, detectFr, isMerge) => {
         let videoTime = `${strHr}:${strMin}:${strsec}`;
-        await gameService.getPlayersDetection(game_id, videoTime, minTobackward, minToforward).then((data) => {            
+        await gameService.getPlayersDetection(game_id, videoTime, minTobackward, minToforward).then((data) => {   
+            console.log(videoTime)
             if (data.length == 0) {
                 console.log('data is empty--');
-                retreiving.current = false;
-                setPositions([]);
+                retreiving.current = false;                
                 return;
             }
 
@@ -53,9 +55,9 @@ const useVideoPlayer = (videoElement, game_id) => {
             } else {
                 detectdata = newCategory;
             }
+            setLabeldata(detectdata)
             currentDetectFr = detectFr;
             retreiving.current = false;
-
             console.log('success fetched');
         });
     };
@@ -63,27 +65,12 @@ const useVideoPlayer = (videoElement, game_id) => {
     const detect = async () => {
         let currentsec = videoElement.current.getCurrentTime();
         let currentframe = parseInt(parseFloat(currentsec?.toFixed(1)) * 30);
+        setVideoCufr(currentframe)
 
         if (previousDeFr === currentDetectFr && previousSec === currentsec) return;
         previousDeFr = currentDetectFr;
         previousSec = currentsec;
         if (currentframe > currentDetectFr - totalTobackword && currentframe < currentDetectFr + frameToforward) {
-            if (detectdata[currentframe] != undefined) {
-                let posData = [];
-                for (let i = 0; i < detectdata[currentframe].length; i++) {
-                    let pos = {};
-                    pos['x'] = detectdata[currentframe][i].x;
-                    pos['y'] = detectdata[currentframe][i].y;
-                    pos['pui'] = detectdata[currentframe][i].pui;
-                    pos['w'] = detectdata[currentframe][i].w;
-                    pos['h'] = detectdata[currentframe][i].h;
-                    pos['id'] = detectdata[currentframe][i].id;
-                    posData.push(pos);
-                }
-                setPositions(posData);
-            } else {
-                setPositions([]);
-            }
 
             if (currentframe < currentDetectFr + frameToforward && currentframe >= currentDetectFr + frameToforward - 900) {
                 if (!retreiving.current) {
@@ -116,8 +103,6 @@ const useVideoPlayer = (videoElement, game_id) => {
                 retreiving.current = true;
 
                 retreivedata(strHr, strMin, strsec, minTobackward, minToforward, totalSec * 30, false);
-
-                // retreivedata(`https://soccerapi.scouting4u.com/player/player_detection/${game_id}/${strHr}:${strMin}:${strsec}/${minTobackward}/${minToforward}`, totalSec * 30, false);
             }
         }
     };
@@ -125,12 +110,13 @@ const useVideoPlayer = (videoElement, game_id) => {
     useEffect(() => {
         let timeInt = setInterval(() => {
             detect();
-        }, 10);
+        }, 30);
         return () => clearInterval(timeInt);
     }, []);
 
     return {
-        positions
+        labeldata,
+        videoCufr
     };
 };
 

@@ -262,6 +262,8 @@ const LeadersPlayerStatDialog = ({ open, onClose, player, t }) => {
     };
 
     const handleDisplayMultiple = () => {
+        if (playData.length !== multipleIds.length) return;
+
         const gameIds = gameList.map((item) => item.id);
         const crypt_msg = gameIds.join(',') + '|' + multipleIds.join(',');
 

@@ -1,14 +1,8 @@
 import * as React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
 import Box from '@mui/material/Box';
 import GameService from '../../services/game.service';
 import TCellTimeEdit from './TCellTimeEdit';
@@ -17,6 +11,9 @@ import CircularProgress from '@mui/material/CircularProgress';
 import DeleteConfirmDialog from '../../common/DeleteConfirmDialog';
 import TCellSelectEdit from './TCellSelectEdit';
 
+import trashImg from '../../assets/icons/bx-trash.png';
+import ReactPaginate from 'react-paginate';
+
 const PERIOD = [
     { id: 1, name: '1st Half' },
     { id: 2, name: '2nd Half' },
@@ -24,15 +21,24 @@ const PERIOD = [
 ];
 
 export default function TeamTagTable({ rows, updateTagList, handleRowClick, selectedId, onPlay, setTeamTagClicked, setTeamTagId, teamTagClicked, setStartTime, ...params }) {
+    
     const [loading, setLoading] = React.useState(false);
     const [deleteOpen, setDeleteOpen] = React.useState(false);
     const [selectedIndex, setSelectedIndex] = React.useState(0);
 
+    const itemsPerPage = 13;
+    const [itemOffset, setItemOffset] = React.useState(0);
+    const endOffset = itemOffset + itemsPerPage;
+    console.log(`Loading items from ${itemOffset} to ${endOffset}`);
+    // const currentItems = rows.slice(itemOffset, endOffset);
+    const pageCount = Math.ceil(rows.length / itemsPerPage);
+    console.log("-----------------------------------------------")
+    console.log(rows.length / itemsPerPage)
+    console.log(pageCount)
+
     const handleDeleteClose = (result) => {
         setDeleteOpen(false);
-
         if (!result) return;
-
         deleteTag(selectedIndex);
     };
 
@@ -48,6 +54,7 @@ export default function TeamTagTable({ rows, updateTagList, handleRowClick, sele
             });
     };
 
+
     const update = (v) => {
         setLoading(true);
         GameService.updateTeamTag(v)
@@ -60,31 +67,40 @@ export default function TeamTagTable({ rows, updateTagList, handleRowClick, sele
             });
     };
 
+    
     React.useEffect(() => {
-        if (rows.lenght <= 0) {
+        if (rows.length <= 0) {
             setTeamTagId(null)
             setTeamTagClicked(false)
         }
     }, [rows])
+
+    const handlePageClick = (event) => {
+        const newOffset = (event.selected * itemsPerPage) % rows.length;
+        console.log(
+            `User requested page number ${event.selected}, which is offset ${newOffset}`
+        );
+        setItemOffset(newOffset);
+    };
 
     return (
         <Box {...params}>
             <DeleteConfirmDialog open={deleteOpen} handleDeleteClose={handleDeleteClose} />
             <Paper sx={{ width: '100%', height: '100%', overflow: 'hidden', p: 0.5 }}>
                 <h5 style={{ textAlign: 'center' }} >Team Tag</h5>
-                <TableContainer style={{ height: '85%' }}>
-                    <Table stickyHeader aria-label="sticky table" size={'small'} sx={{ pb: 4 }}>
-                        <TableHead>
-                            <TableRow>
+                 <div style={{ height: '85%', overflow: 'auto'}}> 
+                    <table style={{minWidth:"400px", width:'100%'}}>
+                        <thead>
+                            <tr style={{backgroundColor:'#121212', height:'30px'}}>
                                 <TableCell align="center">Period</TableCell>
                                 <TableCell align="center">Offensive Team</TableCell>
                                 <TableCell align="center">Defensive Team</TableCell>
                                 <TableCell align="center">Start Time</TableCell>
                                 <TableCell align="center">End Time</TableCell>
                                 <TableCell></TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
+                            </tr>
+                        </thead>
+                        <tbody>
                             {loading ? (
                                 <TableRow>
                                     <TableCell colSpan={5} align="center">
@@ -93,9 +109,9 @@ export default function TeamTagTable({ rows, updateTagList, handleRowClick, sele
                                 </TableRow>
                             ) : (
                                 <>
-                                    {rows.map((row) => {
+                                    {rows.slice(itemOffset, endOffset).map((row) => {
                                         return (
-                                            <TableRow hover role="checkbox" tabIndex={-1} key={row.id} selected={row.id === selectedId} onClick={() => {
+                                            <tr hover="true" style={{background: row.id === selectedId ? 'rgba(144, 202, 249, 0.16)' :'transparent'}} className="tableline" role="checkbox" tabIndex={-1} key={row.id} selected={row.id === selectedId} onClick={() => {
                                                 setTeamTagId(row.id)
                                                 setStartTime(row.start_time)
                                                 setTeamTagClicked(!teamTagClicked)
@@ -107,33 +123,51 @@ export default function TeamTagTable({ rows, updateTagList, handleRowClick, sele
                                                         update({ ...row, period: v });
                                                     }}
                                                 />
-                                                <TableCell align="center" onClick={() => handleRowClick(row)}>
+                                                <td align="center" onClick={() => handleRowClick(row)}>
                                                     {row.offensive_team_name}
-                                                </TableCell>
-                                                <TableCell align="center" onClick={() => handleRowClick(row)}>
+                                                </td>
+                                                <td align="center" onClick={() => handleRowClick(row)}>
                                                     {row.defensive_team_name}
-                                                </TableCell>
+                                                </td>                                                
                                                 <TCellTimeEdit value={row.start_time} update={(v) => update({ ...row, start_time: v })} end={row.end_time} />
                                                 <TCellTimeEdit value={row.end_time} update={(v) => update({ ...row, end_time: v })} start={row.start_time} />
-                                                <TableCell align="center" sx={{ p: 0, m: 0 }}>
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() => {
+                                                <td style={{width:'50px'}} className="trashcell">
+                                                         <img src={trashImg} style={{ filter: 'invert(1)', display:'block'}} width="90%" onClick={() => {
                                                             setSelectedIndex(row.id);
                                                             setDeleteOpen(true);
-                                                        }}
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </TableCell>
-                                            </TableRow>
+                                                        }} />
+                                                 </td>
+                                            </tr>
+
                                         );
-                                    })}
+                                    })}                                    
                                 </>
                             )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                        </tbody>
+                    </table>
+                    <div className='parent-container'>
+                        
+                        <ReactPaginate
+                            breakLabel="..."
+                            nextLabel="next >"
+                            onPageChange={handlePageClick}
+                            pageRangeDisplayed={5}
+                            pageCount={pageCount}
+                            previousLabel="< previous"
+                            pageClassName="page-item"
+                            pageLinkClassName="page-link"
+                            previousClassName="page-item"
+                            previousLinkClassName="page-link"
+                            nextClassName="page-item"
+                            nextLinkClassName="page-link"                                        
+                            breakClassName="page-item"
+                            breakLinkClassName="page-link"
+                            containerClassName="pagination"
+                            activeClassName="active"                                       
+                            renderOnZeroPageCount={null}
+                        />
+                    </div>
+                 </div> 
             </Paper>
         </Box>
     );

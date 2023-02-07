@@ -1,8 +1,8 @@
 import * as React from 'react';
+
 import {
     Select,
     MenuItem,
-    TableCell,
     Input,
 } from '@mui/material';
 
@@ -20,7 +20,7 @@ export default function TCellSelectEdit({ value, rows, update }) {
     }
 
     return (
-        <TableCell
+        <td
             align="center"
             onClick={() => setEditable(true)}
         >
@@ -39,6 +39,6 @@ export default function TCellSelectEdit({ value, rows, update }) {
                 </Select>
                 : <>{value?.name}</>
             }
-        </TableCell>
+        </td>
     );
 }
